@@ -4,6 +4,7 @@ LDFLAGS = -lpthread -lpcap
 
 MKDIR_P = mkdir -p
 OUT_DIR = ../exe
+LIB_DIR = ./lib
 
 # all: directories main
 all: directories server client
@@ -30,7 +31,7 @@ isaac_encryption.o: lib/isaac_encryption.c lib/isaac_encryption.h
 	${CC} ${CFLAGS} -c lib/isaac_encryption.c
 
 clean:
-	rm -rf *.o *.c~ *.cpp~ *.h~ ${OUT_DIR}/server ${OUT_DIR}/client
+	rm -rf *.o *.c~ *.cpp~ *.h~ Makefile~ ${LIB_DIR}/*.c~ ${LIB_DIR}/*.h~ ${OUT_DIR}/server ${OUT_DIR}/client
 
 directories: 
 	${MKDIR_P} ${OUT_DIR}/

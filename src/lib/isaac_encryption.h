@@ -31,16 +31,12 @@ ub4 randrsl[256], randcnt;
 #define MAXMSG 4096
 #define MOD 95
 #define START 32
-// cipher modes for Caesar
-enum ciphermode {
-	mEncipher, mDecipher, mNone 
-};
 
 void 	isaac();
+void 	randinit(int flag);
+void 	iSeed(char *seed, int flag);
 ub4 	iRandom();
 char 	iRandA();
-char 	Caesar(enum ciphermode m, char ch, char shift, char modulo, char start);
-char * 	ConvertCaesar(enum ciphermode m, char *msg, char modulo, char start);
 
 
 #endif
