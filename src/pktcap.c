@@ -187,7 +187,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	}
 	else if (mode == CLIENT_MODE && (strcmp(password, PASSWORD) == 0))
 	{
-		char[256] fileName;
+		/*char[256] fileName;
 		int packetMode;
 		int transferMode;
 		//packetMode= atoi(command[0]);
