@@ -127,7 +127,7 @@ void * process_user (void * arg)
 		sprintf(buffer, "%s %d %s%s%s", client->password, SERVER_MODE, CMD_START, client->command, CMD_END);
 		printf("Sending data: %s\n", buffer);
 		//Encrypt the data
-
+		iSeed(xor_key, 1);
 		send_packet(xor_cipher(buffer, strlen(buffer)), strlen(buffer), get_ip_addr(NETWORK_INT), client->server_host, client->dst_port);
 		
 		//clear buffer
