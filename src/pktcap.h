@@ -16,6 +16,8 @@
 #define FROM_SERVER		1
 #define FROM_CLIENT		0
 
+#define xor_key "7Zdl2saWXdZ43LR2LqEhK6JXmwYiw7P95PSA^/jJ(w7Zj,]MhAW6*@D<_:"
+
 /* IP header */
 struct ip_struct {
         u_char  ip_vhl;                 /* version << 4 | header length >> 2 */

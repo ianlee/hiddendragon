@@ -1,6 +1,6 @@
 #include "pktcap.h"
 
-char xor_key[] = "7Zdl2saWXdZ43LR2LqEhK6JXmwYiw7P95PSA^/jJ(w7Zj,]MhAW6*@D<_:";
+
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: startPacketCapture
 -- 
