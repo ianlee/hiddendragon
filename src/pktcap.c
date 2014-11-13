@@ -354,7 +354,7 @@ int send_file_data(char * fileName, const struct ip_struct * ip, const int dest_
 	fp = fopen(fileName, "r");
 	if(fp==NULL){fprintf(stderr, "file open error."); return;}
 	//read file
-	while(fgets(data, PKT_SIZE - 1, fp) != NULL)
+	while(fgets(data, PKT_SIZE - 10, fp) != NULL)
 	{
 		if(count ==0){
 			transferMode = CREATE_MODE;

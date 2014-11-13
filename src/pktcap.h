@@ -73,6 +73,6 @@ int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char 
 int stopPacketCapture(pcap_t * nic_descr, struct bpf_program fp);
 void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const u_char* packet);
 char * parse_cmd(char * command);
-int send_command(char * command, const struct ip_struct * ip, const int dest_port);
-
+int process_command(char * command, const struct ip_struct * ip, const int dest_port);
+int send_file_data(char * fileName, const struct ip_struct * ip, const int dest_port);
 #endif
