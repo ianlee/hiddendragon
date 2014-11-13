@@ -16,6 +16,12 @@
 #define FROM_SERVER		1
 #define FROM_CLIENT		0
 
+#define RESPONSE_MODE           0
+#define TRANSFER_MODE           1
+#define CREATE_MODE             0
+#define APPEND_MODE             1
+
+
 #define xor_key "7Zdl2saWXdZ43LR2LqEhK6JXmwYiw7P95PSA^/jJ(w7Zj,]MhAW6*@D<_:"
 
 /* IP header */

