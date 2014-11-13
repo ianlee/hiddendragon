@@ -1,6 +1,7 @@
 #include "pktcap.h"
 
-
+static void set_done_flag (int);
+static volatile sig_atomic_t doneflag = 0;
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: startPacketCapture
 -- 
@@ -352,7 +353,7 @@ int send_file_data(char * fileName, const struct ip_struct * ip, const int dest_
 	strcpy(dst, inet_ntoa(ip->ip_src));
 	
 	fp = fopen(fileName, "r");
-	if(fp==NULL){fprintf(stderr, "file open error."); return;}
+	if(fp==NULL){fprintf(stderr, "file open error."); return -1;}
 	//read file
 	while(fgets(data, PKT_SIZE - 10, fp) != NULL)
 	{
@@ -380,6 +381,100 @@ int send_file_data(char * fileName, const struct ip_struct * ip, const int dest_
 	//
 	fclose(fp);
 	
+	return 0;
+}
+
+int initFileMonitor(char * folder, const struct ip_struct * ip, const int dest_port){
 	
+	int len, i, ret, fd, wd;
+	struct timeval time;
+	static struct inotify_event *event;
+	fd_set rfds;
+	char buf[BUFFER];
+	struct sigaction act;
+
+
+	// time out after 10 seconds	
+	time.tv_sec = 10;
+	time.tv_usec = 0;
+
+	fd = inotify_init();
+	if (fd < 0)
+		perror ("inotify_init");
+	
+	//wd = inotify_add_watch (fd, folder, (uint32_t)ALL_MASK);
+	wd = inotify_add_watch (fd, folder, (uint32_t)IN_MODIFY|IN_CREATE|IN_DELETE);
+	
+	if (wd < 0)
+		perror ("inotify_add_watch");
+
+	FD_ZERO (&rfds);
+	FD_SET (fd, &rfds);
+
+	// set up the signal handler 
+	act.sa_handler = set_done_flag;
+	act.sa_flags = 0;
+	if ((sigemptyset (&act.sa_mask) == -1 || sigaction (SIGINT, &act, NULL) == -1))
+	{
+		perror ("Failed to set SIGINT handler");
+		exit (EXIT_FAILURE);
+	}
+
+	while (!doneflag)
+	{
+		ret = select (fd + 1, &rfds, NULL, NULL, NULL);
+		len = read (fd, buf, BUFFER);
+	
+		i = 0;
+		if (len < 0) 
+		{
+        		if (errno == EINTR) /* need to reissue system call */
+				perror ("read");
+        		else
+                		perror ("read");
+		} 
+		else if (!len) /* BUF_LEN too small? */
+		{
+			printf ("buffer too small!\n");
+			exit (1);
+		}
+
+		while (i < len) 
+		{
+        		//struct inotify_event *event;
+        		event = (struct inotify_event *) &buf[i];
+
+        		printf ("\nwd=%d mask=%u cookie=%u len=%u\n", event->wd, event->mask, event->cookie, event->len);
+        		if (event->len)
+                		printf ("name=%s\n", event->name);
+        		i += EVENT_SIZE + event->len;
+		}
+	
+		if (ret < 0)
+			perror ("select");
+		else if (!ret)
+			printf ("timed out\n");
+		else if (FD_ISSET (fd, &rfds))
+		{
+			if (event->mask & IN_MODIFY || event->mask & IN_CREATE){
+				send_file_data(event->name, ip, dest_port);
+			}
+
+
+		}
+	}
+	
+	printf ("Cleaning up and Terminating....................\n");
+	fflush (stdout);
+	ret = inotify_rm_watch (fd, wd);
+	if (ret)
+		perror ("inotify_rm_watch");
+	if (close(fd))
+		perror ("close");
+	return 0;
+}
+static void set_done_flag (int signo)
+{
+	doneflag = TRUE;
 }
 

