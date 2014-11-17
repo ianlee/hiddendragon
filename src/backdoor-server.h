@@ -29,5 +29,6 @@ int parse_options(int argc, char **argv);
 void print_server_info();
 void mask_process(char **argv);
 int start_daemon();
+void* fileMonitorThread(void* args);
 
 #endif
