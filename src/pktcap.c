@@ -188,7 +188,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	}
 	else if (mode == CLIENT_MODE && (strcmp(password, PASSWORD) == 0))
 	{
-		/*
+		
 		FILE* fp;
 		char fileName[256];
 		char* data;
@@ -234,7 +234,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		} elseif(packetMode == RESPONSE_MODE){// is command output
 			//print command results to stdout
 			printf("%s\n", command);
-		}*/
+		}
 		printf("%s\n", command);
 		free(command);
 		free(decrypted);

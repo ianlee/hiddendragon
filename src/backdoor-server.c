@@ -21,6 +21,7 @@ int main(int argc, char **argv)
 {
 	user_options.daemon_mode = FALSE;
 	user_options.port = DEFAULT_PORT;
+	user_options.protocol = TCP_PROTOCOL;
 
 	/* Check to see if user is root */
 	if (geteuid() != USER_ROOT)
@@ -30,6 +31,7 @@ int main(int argc, char **argv)
 	}
 	if(parse_options(argc, argv) < 0)
 		exit(-1);
+
 	start_daemon();
 	print_server_info();
 
