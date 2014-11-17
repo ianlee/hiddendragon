@@ -9,11 +9,15 @@
 #define TRUE 1
 #define FALSE 0
 #define USER_ROOT 0
+#define TCP_PROTOCOL 0
+#define UDP_PROTOCOL 1
+#define ICMP_PROTOCOL 2
 
 struct options
 {
 	int daemon_mode;
 	int port;
+	int protocol;
 
 } user_options;
 
