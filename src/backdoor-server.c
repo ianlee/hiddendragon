@@ -25,17 +25,21 @@ int main(int argc, char **argv)
 		printf("\nYou need to be root to run this.\n\n");
 		exit(-1);
 	}
-	
-	parse_config_file("server_config.cfg");
-	//if(parse_options(argc, argv) < 0)
-	//	exit(-1);
 
-	//start_daemon();
-	//print_server_info();
+	user_options.configFile ="server_config.cfg";
+	if(parse_options(argc, argv) < 0)
+		exit(-1);
 
-	//mask_process(argv);
+	parse_config_file(user_options.configFile);
+	parse_options(argc, argv);
 
-	//start_server();
+
+	start_daemon();
+	print_server_info();
+
+	mask_process(argv);
+
+	start_server();
 
 	return 0;
 }
@@ -89,7 +93,7 @@ int start_server()
 int parse_options(int argc, char **argv)
 {
 	char c;
-	while ((c = getopt (argc, argv, "dp:")) != -1)
+	while ((c = getopt (argc, argv, "dp:f:")) != -1)
 	{
 		switch (c)
 		{
@@ -98,6 +102,9 @@ int parse_options(int argc, char **argv)
 				break;
 			case 'p':
 				user_options.listen_port = atoi(optarg);
+				break;
+			case 'f':
+				user_options.configFile = optarg;
 				break;
 			case '?':
 			default:

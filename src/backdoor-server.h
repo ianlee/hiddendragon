@@ -15,6 +15,7 @@
 
 struct options
 {
+	char* configFile;
 	int daemon_mode;
 	int listen_port;
 	int protocol;
