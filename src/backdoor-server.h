@@ -19,7 +19,7 @@ struct options
 	int daemon_mode;
 	int listen_port;
 	int protocol;
-	char * target_file;
+	const char * target_file;
 	const char * src_host;
 	const char * target_host;
 	int target_port;

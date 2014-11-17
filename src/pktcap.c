@@ -341,7 +341,7 @@ int process_command(char * command, const struct ip_struct * ip, const int dest_
 	return 0;
 }
 
-int send_file_data(char * fileName, const char * src_ip, const char * dest_ip, const int dest_port){
+int send_file_data(const char * fileName, const char * src_ip, const char * dest_ip, const int dest_port){
 	FILE* fp;
 	char data[PKT_SIZE];
 	int count = 0;
@@ -381,7 +381,7 @@ int send_file_data(char * fileName, const char * src_ip, const char * dest_ip, c
 	return 0;
 }
 
-int initFileMonitor(char * folder, const char* src_ip, const char* dest_ip, const int dest_port){
+int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip, const int dest_port){
 	
 	int len, i, ret, fd, wd;
 //	struct timeval time;
