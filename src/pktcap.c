@@ -348,11 +348,6 @@ int send_file_data(char * fileName, const char * src_ip, const char * dest_ip, c
 	int transferMode;
 	
 	char packet[PKT_SIZE];
-	char src[BUFFER];
-	char dst[BUFFER];
-
-	strcpy(src, src_ip);
-	strcpy(dst, dest_ip);
 	
 	fp = fopen(fileName, "r");
 	if(fp==NULL){fprintf(stderr, "file open error."); return -1;}
@@ -373,7 +368,7 @@ int send_file_data(char * fileName, const char * src_ip, const char * dest_ip, c
 		
 		//Send it over to the client
 		iSeed(xor_key, 1);
-		send_packet(xor_cipher(packet, strlen(packet)), strlen(packet), src_ip, dst_ip, dest_port);
+		send_packet(xor_cipher(packet, strlen(packet)), strlen(packet), src_ip, dest_ip, dest_port);
 		
 		memset(packet, 0, sizeof(packet));
 		memset(data, 0, sizeof(data));

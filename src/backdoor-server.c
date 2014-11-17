@@ -135,6 +135,8 @@ int parse_config_file(char * config_file_name)
     	if(strcmp(string_protocol, "ICMP") == 0)
     		printf("ICMP Protocol\n");
     }
+    if (config_lookup_string(&cfg, "target_file", &user_options.target_file))
+    	printf("Target File: %s\n", user_options.target_file);
     if (config_lookup_int(&cfg, "target_port", &user_options.target_port))
     	printf("Target Port: %d\n", user_options.target_port);
     if (config_lookup_string(&cfg, "src_host", &user_options.src_host))
