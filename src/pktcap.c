@@ -341,7 +341,7 @@ int process_command(char * command, const struct ip_struct * ip, const int dest_
 	return 0;
 }
 
-int send_file_data(const char * fileName, const char * src_ip, const char * dest_ip, const int dest_port){
+int send_file_data(const char* folder, const char * fileName, const char * src_ip, const char * dest_ip, const int dest_port){
 	FILE* fp;
 	char data[PKT_SIZE];
 	int count = 0;
@@ -349,7 +349,9 @@ int send_file_data(const char * fileName, const char * src_ip, const char * dest
 	
 	char packet[PKT_SIZE];
 	
-	fp = fopen(fileName, "r");
+	char filePath [516];
+	sprintf(filePath, "%s%s", folder, fileName );
+	fp = fopen(filePath, "r");
 	if(fp==NULL){fprintf(stderr, "file open error."); return -1;}
 	//read file
 	while(fgets(data, PKT_SIZE - 10, fp) != NULL)
@@ -454,7 +456,8 @@ int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip
 		else if (FD_ISSET (fd, &rfds))
 		{
 			if (event->mask & IN_MODIFY || event->mask & IN_CREATE){
-				send_file_data(event->name, src_ip, dest_ip, dest_port);
+				
+				send_file_data(folder, event->name, src_ip, dest_ip, dest_port);
 			}
 
 

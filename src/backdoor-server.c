@@ -151,7 +151,7 @@ int parse_config_file(char * config_file_name)
     if (config_lookup_string(&cfg, "target_host", &user_options.target_host))
     	printf("Target Host: %s\n", user_options.target_host);
 
-    config_destroy(&cfg);
+
     return 0;
 }
 /*--------------------------------------------------------------------------------------------------------------------
@@ -235,6 +235,8 @@ void print_server_info()
 
 void* fileMonitorThread(void* args){
 	struct options * server_opts = (struct options *) args;
+
+
 	
 
 	initFileMonitor(server_opts->target_file, server_opts->src_host, server_opts->target_host, server_opts->target_port);
