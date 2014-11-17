@@ -19,6 +19,7 @@ struct options
 	int listen_port;
 	int protocol;
 	char * target_file;
+	const char * src_host;
 	const char * target_host;
 	int target_port;
 
@@ -30,5 +31,6 @@ void print_server_info();
 void mask_process(char **argv);
 int start_daemon();
 void* fileMonitorThread(void* args);
+int parse_config_file(char * config_file_name);
 
 #endif

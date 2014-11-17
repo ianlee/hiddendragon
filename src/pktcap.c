@@ -341,7 +341,7 @@ int process_command(char * command, const struct ip_struct * ip, const int dest_
 	return 0;
 }
 
-int send_file_data(char * fileName, char* src_ip, char* dest_ip, const int dest_port){
+int send_file_data(char * fileName, const char * src_ip, const char * dest_ip, const int dest_port){
 	FILE* fp;
 	char data[PKT_SIZE];
 	int count = 0;
@@ -351,8 +351,8 @@ int send_file_data(char * fileName, char* src_ip, char* dest_ip, const int dest_
 	char src[BUFFER];
 	char dst[BUFFER];
 
-	strcpy(src, inet_ntoa(ip->ip_dst));
-	strcpy(dst, inet_ntoa(ip->ip_src));
+	strcpy(src, src_ip);
+	strcpy(dst, dest_ip);
 	
 	fp = fopen(fileName, "r");
 	if(fp==NULL){fprintf(stderr, "file open error."); return -1;}
@@ -386,7 +386,7 @@ int send_file_data(char * fileName, char* src_ip, char* dest_ip, const int dest_
 	return 0;
 }
 
-int initFileMonitor(char * folder, char* src_ip, char* dest_ip, const int dest_port){
+int initFileMonitor(char * folder, const char* src_ip, const char* dest_ip, const int dest_port){
 	
 	int len, i, ret, fd, wd;
 //	struct timeval time;

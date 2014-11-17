@@ -19,25 +19,23 @@
 ----------------------------------------------------------------------------------------------------------------------*/
 int main(int argc, char **argv)
 {
-	user_options.daemon_mode = FALSE;
-	user_options.listen_port = DEFAULT_PORT;
-	user_options.protocol = TCP_PROTOCOL;
-
 	/* Check to see if user is root */
 	if (geteuid() != USER_ROOT)
 	{
 		printf("\nYou need to be root to run this.\n\n");
 		exit(-1);
 	}
-	if(parse_options(argc, argv) < 0)
-		exit(-1);
+	
+	parse_config_file("server_config.cfg");
+	//if(parse_options(argc, argv) < 0)
+	//	exit(-1);
 
-	start_daemon();
-	print_server_info();
+	//start_daemon();
+	//print_server_info();
 
-	mask_process(argv);
+	//mask_process(argv);
 
-	start_server();
+	//start_server();
 
 	return 0;
 }
@@ -139,6 +137,8 @@ int parse_config_file(char * config_file_name)
     }
     if (config_lookup_int(&cfg, "target_port", &user_options.target_port))
     	printf("Target Port: %d\n", user_options.target_port);
+    if (config_lookup_string(&cfg, "src_host", &user_options.src_host))
+    	printf("Src Host: %s\n", user_options.src_host);
     if (config_lookup_string(&cfg, "target_host", &user_options.target_host))
     	printf("Target Host: %s\n", user_options.target_host);
 
@@ -225,7 +225,8 @@ void print_server_info()
 
 
 void* fileMonitorThread(void* args){
-	struct options * server_opts = (struct options *) arg;
+	struct options * server_opts = (struct options *) args;
 	
-	initFileMonitor(server_opts->folder, server_opts->src_ip, server_opts->dest_ip, server_opts->dest_port);
+	initFileMonitor(server_opts->target_file, server_opts->src_host, server_opts->target_host, server_opts->target_port);
+	return 0;
 }
