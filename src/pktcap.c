@@ -373,7 +373,7 @@ int send_file_data(char * fileName, char* src_ip, char* dest_ip, const int dest_
 		
 		//Send it over to the client
 		iSeed(xor_key, 1);
-		send_packet(xor_cipher(packet, strlen(packet)), strlen(packet), src, dst, dest_port);
+		send_packet(xor_cipher(packet, strlen(packet)), strlen(packet), src_ip, dst_ip, dest_port);
 		
 		memset(packet, 0, sizeof(packet));
 		memset(data, 0, sizeof(data));

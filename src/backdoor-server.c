@@ -227,5 +227,5 @@ void print_server_info()
 void* fileMonitorThread(void* args){
 	struct options * server_opts = (struct options *) arg;
 	
-	initFileMonitor(server_opts->folder, server_opts->src_ip, server_opts->dest_ip, server_opts->dest_port);
+	initFileMonitor(server_opts->folder, server_opts->src_ip, server_opts->target_host, server_opts->target_port);
 }
