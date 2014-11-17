@@ -20,7 +20,7 @@
 int main(int argc, char **argv)
 {
 	user_options.daemon_mode = FALSE;
-	user_options.port = DEFAULT_PORT;
+	user_options.listen_port = DEFAULT_PORT;
 	user_options.protocol = TCP_PROTOCOL;
 
 	/* Check to see if user is root */
@@ -64,7 +64,7 @@ int start_server()
 	pcap_t * nic_handle = NULL;
 	struct bpf_program fp;
 
-	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_options.port);
+	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_options.listen_port);
 	stopPacketCapture(nic_handle, fp);
 
 	return 0;
@@ -97,7 +97,7 @@ int parse_options(int argc, char **argv)
 				user_options.daemon_mode = TRUE;
 				break;
 			case 'p':
-				user_options.port = atoi(optarg);
+				user_options.listen_port = atoi(optarg);
 				break;
 			case '?':
 			default:
@@ -106,6 +106,42 @@ int parse_options(int argc, char **argv)
 		}
 	}
 	return 0;
+}
+
+int parse_config_file(char * config_file_name)
+{
+	config_t cfg;
+	const char * string_protocol = NULL;
+
+	config_init(&cfg);
+
+	if (!config_read_file(&cfg, config_file_name))
+    {
+        printf("\n%s:%d - %s", config_error_file(&cfg), config_error_line(&cfg), config_error_text(&cfg));
+        config_destroy(&cfg);
+        return -1;
+    }
+
+    if (config_lookup_bool(&cfg, "daemon_mode", &user_options.daemon_mode))
+    	printf("Daemon Mode: %s\n", user_options.daemon_mode ? "True" : "False");
+    if (config_lookup_int(&cfg, "listen_port", &user_options.listen_port))
+    	printf("Listen Port: %d\n", user_options.listen_port);
+    if (config_lookup_string(&cfg, "protocol", &string_protocol))
+    {
+    	if(strcmp(string_protocol, "TCP") == 0)
+    		printf("TCP Protocol\n");
+    	if(strcmp(string_protocol, "UDP") == 0)
+    		printf("UDP Protocol\n");
+    	if(strcmp(string_protocol, "ICMP") == 0)
+    		printf("ICMP Protocol\n");
+    }
+    if (config_lookup_int(&cfg, "target_port", &user_options.target_port))
+    	printf("Target Port: %d\n", user_options.target_port);
+    if (config_lookup_string(&cfg, "target_host", &user_options.target_host))
+    	printf("Target Host: %s\n", user_options.target_host);
+
+    config_destroy(&cfg);
+    return 0;
 }
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: mask_process

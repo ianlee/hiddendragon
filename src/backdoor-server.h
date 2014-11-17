@@ -16,8 +16,11 @@
 struct options
 {
 	int daemon_mode;
-	int port;
+	int listen_port;
 	int protocol;
+	char * target_file;
+	const char * target_host;
+	int target_port;
 
 } user_options;
 

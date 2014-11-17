@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -g
-LDFLAGS = -lpthread -lpcap
+LDFLAGS = -lpthread -lpcap -lconfig
 
 MKDIR_P = mkdir -p
 OUT_DIR = ../exe

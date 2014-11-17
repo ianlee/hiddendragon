@@ -13,6 +13,7 @@
 #include <sys/ioctl.h>
 #include <pthread.h>
 #include <termios.h>
+#include <libconfig.h>
 
 #define __FAVOR_BSD
 #include <sys/socket.h>
