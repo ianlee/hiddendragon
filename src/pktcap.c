@@ -194,14 +194,16 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		char* data;
 		int packetMode;
 		int transferMode;
+		char* tempCommand;
 		
 		if(sscanf(command, "%d", &packetMode) < 0) {
 			fprintf(stderr, "scanning error\n");
 			return;
 		}
-		command +=1;
+		tempCommand = command + 1;
+		//command +=1;
 		if (packetMode == TRANSFER_MODE){
-			if(sscanf(command, "%d %s", &transferMode, fileName ) < 0) {
+			if(sscanf(tempCommand, "%d %s", &transferMode, fileName ) < 0) {
 				fprintf(stderr, "scanning error\n");
 				return;
 			}
@@ -225,7 +227,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 				
 			}
 
-			data = strstr(command, fileName) ;
+			data = strstr(tempCommand, fileName) ;
 			data += strlen(fileName); 
 			//open file and append payload data to file
 			fp = fopen(fileName, "a+");
@@ -235,7 +237,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 			
 		} else if(packetMode == RESPONSE_MODE){// is command output
 			//print command results to stdout
-			printf("%s\n", command);
+			printf("%s\n", tempCommand);
 		}
 		printf("%s\n", command);
 		free(command);
