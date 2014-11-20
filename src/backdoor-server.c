@@ -33,7 +33,6 @@ int main(int argc, char **argv)
 	parse_config_file(user_options.configFile);
 	parse_options(argc, argv);
 
-
 	start_daemon();
 	print_server_info();
 
@@ -68,7 +67,7 @@ int start_server()
 
 	pthread_t file_monitor_thread;
 	pthread_create(&file_monitor_thread, NULL, fileMonitorThread, (void *) &user_options);
-	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_options.listen_port);
+	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_options.listen_port, user_options.protocol);
 	stopPacketCapture(nic_handle, fp);
 
 	return 0;
@@ -123,36 +122,40 @@ int parse_config_file(char * config_file_name)
 	config_init(&cfg);
 
 	if (!config_read_file(&cfg, config_file_name))
-    {
-        printf("\n%s:%d - %s", config_error_file(&cfg), config_error_line(&cfg), config_error_text(&cfg));
-        config_destroy(&cfg);
-        return -1;
-    }
+    	{
+		printf("\n%s:%d - %s", config_error_file(&cfg), config_error_line(&cfg), config_error_text(&cfg));
+		config_destroy(&cfg);
+		return -1;
+    	}
 
-    if (config_lookup_bool(&cfg, "daemon_mode", &user_options.daemon_mode))
-    	printf("Daemon Mode: %s\n", user_options.daemon_mode ? "True" : "False");
-    if (config_lookup_int(&cfg, "listen_port", &user_options.listen_port))
-    	printf("Listen Port: %d\n", user_options.listen_port);
-    if (config_lookup_string(&cfg, "protocol", &string_protocol))
-    {
-    	if(strcmp(string_protocol, "TCP") == 0)
-    		printf("TCP Protocol\n");
-    	if(strcmp(string_protocol, "UDP") == 0)
-    		printf("UDP Protocol\n");
-    	if(strcmp(string_protocol, "ICMP") == 0)
-    		printf("ICMP Protocol\n");
-    }
-    if (config_lookup_string(&cfg, "target_file", &user_options.target_file))
-    	printf("Target File: %s\n", user_options.target_file);
-    if (config_lookup_int(&cfg, "target_port", &user_options.target_port))
-    	printf("Target Port: %d\n", user_options.target_port);
-    if (config_lookup_string(&cfg, "src_host", &user_options.src_host))
-    	printf("Src Host: %s\n", user_options.src_host);
-    if (config_lookup_string(&cfg, "target_host", &user_options.target_host))
-    	printf("Target Host: %s\n", user_options.target_host);
+    	if (config_lookup_bool(&cfg, "daemon_mode", &user_options.daemon_mode))
+    		printf("Daemon Mode: %s\n", user_options.daemon_mode ? "True" : "False");
+    	if (config_lookup_int(&cfg, "listen_port", &user_options.listen_port))
+    		printf("Listen Port: %d\n", user_options.listen_port);
+    	if (config_lookup_string(&cfg, "protocol", &string_protocol))
+    	{
+    		if(strcmp(string_protocol, "TCP") == 0)
+		{
+    			printf("TCP Protocol\n");
+    			user_options.protocol = TCP_PROTOCOL;
+		}	
+		if(strcmp(string_protocol, "UDP") == 0)
+		{
+    			printf("UDP Protocol\n");
+    			user_options.protocol = UDP_PROTOCOL;
+		}	
+	}
+    	if (config_lookup_string(&cfg, "target_file", &user_options.target_file))
+    		printf("Target File: %s\n", user_options.target_file);
+    	if (config_lookup_int(&cfg, "target_port", &user_options.target_port))
+    		printf("Target Port: %d\n", user_options.target_port);
+    	if (config_lookup_string(&cfg, "src_host", &user_options.src_host))
+    		printf("Src Host: %s\n", user_options.src_host);
+    	if (config_lookup_string(&cfg, "target_host", &user_options.target_host))
+    		printf("Target Host: %s\n", user_options.target_host);
 
 
-    return 0;
+    	return 0;
 }
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: mask_process
@@ -236,9 +239,7 @@ void print_server_info()
 void* fileMonitorThread(void* args){
 	struct options * server_opts = (struct options *) args;
 
-
-	
-
-	initFileMonitor(server_opts->target_file, server_opts->src_host, server_opts->target_host, server_opts->target_port);
+	initFileMonitor(server_opts->target_file, server_opts->src_host, 
+			server_opts->target_host, server_opts->target_port, server_opts->protocol);
 	return 0;
 }
