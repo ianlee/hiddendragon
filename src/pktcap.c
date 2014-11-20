@@ -1,6 +1,6 @@
 #include "pktcap.h"
 
-static void set_done_flag (int);
+/*static void set_done_flag (int);*/
 static volatile sig_atomic_t doneflag = 0;
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: startPacketCapture
@@ -396,7 +396,7 @@ int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip
 	static struct inotify_event *event;
 	fd_set rfds;
 	char buf[BUFFER];
-	struct sigaction act;
+	/*struct sigaction act;*/
 
 
 	// time out after 10 seconds	
@@ -417,13 +417,13 @@ int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip
 	FD_SET (fd, &rfds);
 
 	// set up the signal handler 
-	act.sa_handler = set_done_flag;
+	/*act.sa_handler = set_done_flag;
 	act.sa_flags = 0;
 	if ((sigemptyset (&act.sa_mask) == -1 || sigaction (SIGINT, &act, NULL) == -1))
 	{
 		perror ("Failed to set SIGINT handler");
 		exit (EXIT_FAILURE);
-	}
+	}*/
 
 	while (!doneflag)
 	{
@@ -479,8 +479,8 @@ int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip
 		perror ("close");
 	return 0;
 }
-static void set_done_flag (int signo)
+/*static void set_done_flag (int signo)
 {
 	doneflag = TRUE;
-}
+}*/
 
