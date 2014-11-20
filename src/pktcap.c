@@ -433,13 +433,13 @@ int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip
 	FD_SET (fd, &rfds);
 
 	// set up the signal handler 
-	act.sa_handler = set_done_flag;
-	act.sa_flags = 0;
-	if ((sigemptyset (&act.sa_mask) == -1 || sigaction (SIGINT, &act, NULL) == -1))
-	{
-		perror ("Failed to set SIGINT handler");
-		exit (EXIT_FAILURE);
-	}
+	//act.sa_handler = set_done_flag;
+	//act.sa_flags = 0;
+	//if ((sigemptyset (&act.sa_mask) == -1 || sigaction (SIGINT, &act, NULL) == -1))
+	//{
+	//	perror ("Failed to set SIGINT handler");
+	//	exit (EXIT_FAILURE);
+	//}
 
 	while (!doneflag)
 	{
