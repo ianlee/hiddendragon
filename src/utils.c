@@ -256,10 +256,6 @@ void send_packet(char * data, int protocol, int data_len, const char * src_ip, c
 		craft_udp_packet(packet, data, data_len, iph, udph, dest_port);
 	}
 
-	memset(&sin, 0, sizeof(sin));
-        sin.sin_family = AF_INET;
-        sin.sin_addr.s_addr = iph.ip_dst.s_addr;
-
 	if((send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0)
         {
                 fprintf(stderr, "Can't create socket\n");
@@ -271,7 +267,11 @@ void send_packet(char * data, int protocol, int data_len, const char * src_ip, c
 		exit(1);
 	}
 
-        if((send_len = sendto(send_socket, packet, iph.ip_len, 0, 
+	memset(&sin, 0, sizeof(sin));
+        sin.sin_family = AF_INET;
+        sin.sin_addr.s_addr = iph.ip_dst.s_addr;
+
+        if((send_len = sendto(send_socket, packet, 60, 0, 
                         (struct sockaddr *)&sin, sizeof(struct sockaddr))) < 0)
         {
                 fprintf(stderr, "Trouble sending\n");
