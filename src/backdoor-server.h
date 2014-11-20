@@ -13,6 +13,8 @@
 #define UDP_PROTOCOL 1
 #define ICMP_PROTOCOL 2
 
+
+
 struct options
 {
 	char* configFile;
@@ -23,6 +25,7 @@ struct options
 	const char * src_host;
 	const char * target_host;
 	int target_port;
+	struct filelist file_list;
 
 } user_options;
 

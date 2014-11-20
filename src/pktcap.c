@@ -389,13 +389,14 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 	return 0;
 }
 
-int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip, const int dest_port){
+int initFileMonitor(struct filelist* folder, const char* src_ip, const char* dest_ip, const int dest_port){
 	
 	int len, i, ret, fd, wd;
 //	struct timeval time;
 	static struct inotify_event *event;
 	fd_set rfds;
 	char buf[BUFFER];
+	const char* tempFolder;
 	/*struct sigaction act;*/
 
 
@@ -407,12 +408,16 @@ int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip
 	if (fd < 0)
 		perror ("inotify_init");
 	
-	//wd = inotify_add_watch (fd, folder, (uint32_t)ALL_MASK);
-	wd = inotify_add_watch (fd, folder, (uint32_t)IN_MODIFY|IN_CREATE|IN_DELETE);
+	struct filelist* fileNode = folder;
+	while(fileNode!=NULL){
+		//wd = inotify_add_watch (fd, folder, (uint32_t)ALL_MASK);
+		wd = inotify_add_watch (fd, fileNode->path, (uint32_t)IN_MODIFY|IN_CREATE|IN_DELETE);
 	
-	if (wd < 0)
-		perror ("inotify_add_watch");
-
+		if (wd < 0)
+			perror ("inotify_add_watch");
+		fileNode->wd = wd;
+		fileNode = fileNode->next;
+	}
 	FD_ZERO (&rfds);
 	FD_SET (fd, &rfds);
 
@@ -462,8 +467,17 @@ int initFileMonitor(const char * folder, const char* src_ip, const char* dest_ip
 		else if (FD_ISSET (fd, &rfds))
 		{
 			if (event->mask & IN_MODIFY || event->mask & IN_CREATE){
-				
-				send_file_data(folder, event->name, src_ip, dest_ip, dest_port);
+				fileNode = folder;
+				while(fileNode!=NULL){
+					if(fileNode->wd == event->wd){
+						tempFolder = fileNode->path;
+						printf ("%d %d %s\n",event->wd, fileNode->wd, tempFolder);
+						break;
+					}
+					fileNode = fileNode->next;
+				}
+				printf ("%s\n", tempFolder);
+				send_file_data(tempFolder, event->name, src_ip, dest_ip, dest_port);
 			}
 
 

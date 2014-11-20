@@ -118,6 +118,7 @@ int parse_options(int argc, char **argv)
 int parse_config_file(char * config_file_name)
 {
 	config_t cfg;
+	const config_setting_t *files;
 	const char * string_protocol = NULL;
 
 	config_init(&cfg);
@@ -144,6 +145,35 @@ int parse_config_file(char * config_file_name)
     }
     if (config_lookup_string(&cfg, "target_file", &user_options.target_file))
     	printf("Target File: %s\n", user_options.target_file);
+
+    if ((files = config_lookup(&cfg, "file_list"))){
+	int count = config_setting_length(files);
+	int n;
+	struct filelist* fileNode = &user_options.file_list;
+	for (n = 0; n < count; n++) {
+		
+		fileNode->path = config_setting_get_string_elem(files,n);
+		//printf("Filelist1: %s\n", fileNode->path);
+
+		if(n<count-1){
+			fileNode->next = (struct filelist*)malloc( sizeof(struct filelist));
+			fileNode = fileNode->next;
+		}else {
+			fileNode->next=NULL;
+		}
+	}
+	fileNode = &user_options.file_list;
+	while(fileNode!=NULL){
+		printf("Filelist: %s\n", fileNode->path);
+		fileNode = fileNode->next;
+	}
+
+    }
+    
+
+
+
+
     if (config_lookup_int(&cfg, "target_port", &user_options.target_port))
     	printf("Target Port: %d\n", user_options.target_port);
     if (config_lookup_string(&cfg, "src_host", &user_options.src_host))
@@ -239,6 +269,6 @@ void* fileMonitorThread(void* args){
 
 	
 
-	initFileMonitor(server_opts->target_file, server_opts->src_host, server_opts->target_host, server_opts->target_port);
+	initFileMonitor(&server_opts->file_list, server_opts->src_host, server_opts->target_host, server_opts->target_port);
 	return 0;
 }
