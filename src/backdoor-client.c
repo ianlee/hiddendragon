@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 	}
 
 	client.dst_port = DEFAULT_PORT;
-	client.protocol = UDP_PROTOCOL;
+	client.protocol = TCP_PROTOCOL;
 	
 	if(parse_options(argc, argv) < 0)
 		exit(1);

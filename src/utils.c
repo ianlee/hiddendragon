@@ -271,7 +271,7 @@ void send_packet(char * data, int protocol, int data_len, const char * src_ip, c
         sin.sin_family = AF_INET;
         sin.sin_addr.s_addr = iph.ip_dst.s_addr;
 
-        if((send_len = sendto(send_socket, packet, 60, 0, 
+        if((send_len = sendto(send_socket, packet, iph.ip_len, 0, 
                         (struct sockaddr *)&sin, sizeof(struct sockaddr))) < 0)
         {
                 fprintf(stderr, "Trouble sending\n");
@@ -304,7 +304,7 @@ void craft_udp_packet(unsigned char * packet, char * data, int data_len, struct 
 {
 	udph.uh_sport = htons(1 + (int)(10000.0 * rand() / (RAND_MAX + 1.0)));
 	udph.uh_dport = htons(dest_port);
-	udph.uh_ulen = htons(sizeof(struct udphdr) + data_len);
+	udph.uh_ulen = htons(iph.ip_len - sizeof(struct ip));
 	udph.uh_sum = 0;
 
 	iph.ip_sum = in_cksum((unsigned short *)&iph, sizeof(iph));
