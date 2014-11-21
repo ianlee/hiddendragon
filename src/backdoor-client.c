@@ -26,6 +26,7 @@ int main(int argc, char **argv)
 	}
 
 	client.dst_port = DEFAULT_PORT;
+	client.protocol = TCP_PROTOCOL;
 	
 	if(parse_options(argc, argv) < 0)
 		exit(1);
@@ -60,7 +61,7 @@ int startClient()
 
 	//start libpcap to display results
 	pthread_create(&user_thread, NULL, process_user, (void *) &client);
-	startPacketCapture(nic_handle, fp, FROM_SERVER, client.server_host, client.dst_port);
+	startPacketCapture(nic_handle, fp, FROM_SERVER, client.server_host, client.dst_port, client.protocol);
 	
 	stopPacketCapture(nic_handle, fp);
 	return 0;
@@ -95,8 +96,9 @@ void * process_user (void * arg)
 	tcgetattr(fileno(stdin), &initial_rsettings);
 	new_rsettings = initial_rsettings;
 	new_rsettings.c_lflag &= ~ECHO;
-
 	
+	print_client_info();
+
 	while(!quit)
 	{
 		// First time iteration
@@ -128,7 +130,8 @@ void * process_user (void * arg)
 		printf("Sending data: %s\n", buffer);
 		//Encrypt the data
 		iSeed(xor_key, 1);
-		send_packet(xor_cipher(buffer, strlen(buffer)), strlen(buffer), get_ip_addr(NETWORK_INT), client->server_host, client->dst_port);
+		send_packet(xor_cipher(buffer, strlen(buffer)), client->protocol, strlen(buffer), 
+				get_ip_addr(NETWORK_INT), client->server_host, client->dst_port);
 		
 		//clear buffer
 		memset(client->command, 0, BUF_LENGTH);
@@ -159,15 +162,21 @@ int parse_options(int argc, char **argv)
 {
 	char c;
 
-	while ((c = getopt (argc, argv, "a:p")) != -1)
+	while ((c = getopt (argc, argv, "a:dp:")) != -1)
 	{
 		switch(c)
 		{
 			case 'a':
 				client.server_host = optarg;
 				break;
-			case 'p':
+			case 'd':
 				client.dst_port = atoi(optarg);
+				break;
+			case 'p':
+				if(strcmp(optarg, "TCP") == 0)
+					client.protocol = TCP_PROTOCOL;
+				if(strcmp(optarg, "UDP") == 0)
+					client.protocol = UDP_PROTOCOL;
 				break;
 			case '?':
 			default:
@@ -180,7 +189,7 @@ int parse_options(int argc, char **argv)
 
 }
 /*--------------------------------------------------------------------------------------------------------------------
--- FUNCTION: print_server_info
+-- FUNCTION: print_client_info
 -- 
 -- DATE: 2014/09/06
 -- 
@@ -190,7 +199,7 @@ int parse_options(int argc, char **argv)
 -- 
 -- PROGRAMMER: Luke Tao, Ian Lee
 -- 
--- INTERFACE: void print_server_info()
+-- INTERFACE: void print_client_info()
 -- 
 -- RETURNS: void
 -- 
@@ -200,5 +209,6 @@ void print_client_info()
 {
 	fprintf(stderr, "Server's IP host: %s\n", client.server_host);
 	fprintf(stderr, "Server's destination port: %d\n", client.dst_port);
+	fprintf(stderr, "Server's receiving protocol: %s\n", client.protocol == TCP_PROTOCOL ? "TCP" : "UDP");
 	fprintf(stderr, "Sending cmd: %s\n", client.command);
 }

