@@ -162,7 +162,7 @@ int parse_options(int argc, char **argv)
 {
 	char c;
 
-	while ((c = getopt (argc, argv, "a:dp")) != -1)
+	while ((c = getopt (argc, argv, "a:dp:")) != -1)
 	{
 		switch(c)
 		{

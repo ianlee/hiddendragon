@@ -32,8 +32,8 @@
 
 #define SERVER_MODE 0
 #define CLIENT_MODE 1
-#define TCP_PROTOCOL 0
-#define UDP_PROTOCOL 1
+#define TCP_PROTOCOL 6
+#define UDP_PROTOCOL 17
 
 unsigned short in_cksum(unsigned short *ptr, int nbytes);
 unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *addr, int length);
