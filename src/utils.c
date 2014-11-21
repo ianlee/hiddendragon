@@ -272,7 +272,7 @@ void send_packet(char * data, int protocol, int data_len, const char * src_ip, c
         sin.sin_addr.s_addr = iph.ip_dst.s_addr;
 
 	printf("IP length: %d\n", iph.ip_len);
-        if((send_len = sendto(send_socket, packet, 60, 0, 
+        if((send_len = sendto(send_socket, packet, iph.ip_len, 0, 
                         (struct sockaddr *)&sin, sizeof(struct sockaddr))) < 0)
         {
                 fprintf(stderr, "Trouble sending\n");
