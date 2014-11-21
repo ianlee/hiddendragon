@@ -54,10 +54,9 @@ int main(int argc, char **argv)
 ----------------------------------------------------------------------------------------------------------------------*/
 int startClient()
 {
-	
+	pthread_t user_thread;
 	pcap_t * nic_handle = NULL;
 	struct bpf_program fp;
-	pthread_t user_thread;
 
 	//start libpcap to display results
 	pthread_create(&user_thread, NULL, process_user, (void *) &client);

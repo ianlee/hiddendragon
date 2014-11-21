@@ -33,5 +33,6 @@ void mask_process(char **argv);
 int start_daemon();
 void* fileMonitorThread(void* args);
 int parse_config_file(char * config_file_name);
+void * packetCapThread(void * args);
 
 #endif
