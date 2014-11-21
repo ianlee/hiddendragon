@@ -368,7 +368,8 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 	FILE* fp;
 	char data[PKT_SIZE];
 	int count = 0;
-	int transferMode;
+	int transferMode, bytes_read, packet_len;
+	char * tempPointer;
 	
 	char packet[PKT_SIZE];
 	
@@ -377,7 +378,7 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 	fp = fopen(filePath, "rb");
 	if(fp==NULL){fprintf(stderr, "file open error."); return -1;}
 	//read file
-	while(fread(data, 1, PKT_SIZE - 100, fp))
+	while((bytes_read = fread(data, 1, PKT_SIZE - 100, fp)) > 0)
 	{
 		if(count ==0){
 			transferMode = CREATE_MODE;
@@ -385,19 +386,26 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 			transferMode = APPEND_MODE;
 		}
 		
-		
+		tempPointer = packet;
 		//Format packet payload
 		sprintf(packet, "%s %d %s%d %d %s ", PASSWORD, CLIENT_MODE, CMD_START, TRANSFER_MODE, transferMode, fileName);
-		strcat(packet, data);
-		strcat(packet, CMD_END);
+		tempPointer += strlen(packet);
+
+		memcpy(tempPointer, data, bytes_read);
+		tempPointer += bytes_read;
+
+		memcpy(tempPointer, CMD_END, strlen(CMD_END));
+		tempPointer += strlen(CMD_END);
+
+		packet_len = tempPointer - packet;
 
 		printf("Packet: %s\n", packet);
-		printf("Packet Size: %d\n", strlen(packet));
+		printf("Packet Size: %d\n", (int)strlen(packet));
 		//Encrypt payload
 		
 		//Send it over to the client
 		iSeed(xor_key, 1);
-		send_packet(xor_cipher(packet, strlen(packet)), protocol, strlen(packet), src_ip, dest_ip, dest_port);
+		send_packet(xor_cipher(packet, strlen(packet)), protocol, packet_len, src_ip, dest_ip, dest_port);
 		
 		memset(packet, 0, sizeof(packet));
 		memset(data, 0, sizeof(data));
