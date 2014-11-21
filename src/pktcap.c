@@ -258,7 +258,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 			//print command results to stdout
 			printf("%s\n", tempCommand);
 		}
-		printf("%s\n", command);
+		//printf("%s\n", command);
 		free(command);
 		free(decrypted);
 		return;
