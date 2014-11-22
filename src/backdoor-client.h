@@ -25,6 +25,7 @@ int startClient();
 int parse_options(int argc, char **argv);
 void print_client_info();
 void * process_user (void * arg);
+void * clientCapThread(void * args);
 
 
 #endif

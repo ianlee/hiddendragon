@@ -54,15 +54,13 @@ int main(int argc, char **argv)
 ----------------------------------------------------------------------------------------------------------------------*/
 int startClient()
 {
-	pthread_t user_thread;
-	pcap_t * nic_handle = NULL;
-	struct bpf_program fp;
+	pthread_t user_thread, user_cap_thread;
 
 	//start libpcap to display results
 	pthread_create(&user_thread, NULL, process_user, (void *) &client);
-	startPacketCapture(nic_handle, fp, FROM_SERVER, client.server_host, client.dst_port, client.protocol);
+	pthread_create(&user_cap_thread, NULL, clientCapThread, (void *) &client);
+	pthread_join(user_cap_thread, NULL);
 	
-	stopPacketCapture(nic_handle, fp);
 	return 0;
 }
 /*--------------------------------------------------------------------------------------------------------------------
@@ -210,4 +208,16 @@ void print_client_info()
 	fprintf(stderr, "Server's destination port: %d\n", client.dst_port);
 	fprintf(stderr, "Server's receiving protocol: %s\n", client.protocol == TCP_PROTOCOL ? "TCP" : "UDP");
 	fprintf(stderr, "Sending cmd: %s\n", client.command);
+}
+
+void * clientCapThread(void * args)
+{
+	struct client * client_opt = (struct client *) args;	
+	pcap_t * nic_handle = NULL;
+	struct bpf_program fp;	
+
+	startPacketCapture(nic_handle, fp, FROM_SERVER, client_opt->server_host, client_opt->dst_port, client_opt->protocol);
+	stopPacketCapture(nic_handle, fp);
+
+	return 0;
 }
