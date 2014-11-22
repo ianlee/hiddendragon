@@ -400,17 +400,20 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 		//Format packet payload
 		sprintf(packet, "%s %d %s%d %d %s ", PASSWORD, CLIENT_MODE, CMD_START, TRANSFER_MODE, transferMode, fileName);
 		tempPointer += strlen(packet);
+		
+		printf("Packet before appending data: %s\n", packet);
 
 		memcpy(tempPointer, data, bytes_read);
 		tempPointer += bytes_read;
+		printf("Packet after appending data: %s\n", packet);
 
 		memcpy(tempPointer, CMD_END, strlen(CMD_END));
 		tempPointer += strlen(CMD_END);
 
+		printf("Packet after appending end: %s\n", packet);
+		
 		packet_len = tempPointer - packet;
-
-		printf("Packet: %s\n", packet);
-		printf("Packet Size: %d\n", (int)strlen(packet));
+		printf("Packet Size: %d\n", packet_len);
 		//Encrypt payload
 		
 		//Send it over to the client
