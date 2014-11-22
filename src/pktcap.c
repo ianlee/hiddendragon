@@ -245,7 +245,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 				}
 				
 			}
-
+			printf("Temp Command: %s\n", tempCommand);
 			data = strstr(tempCommand, fileName) ;
 			data += strlen(fileName);
 			datalen = datalen - (data - command);
@@ -380,12 +380,14 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 	//read file
 	while((bytes_read = fread(data, 1, PKT_SIZE - 100, fp)) > 0)
 	{
-		if(count ==0){
+		if(count == 0){
 			transferMode = CREATE_MODE;
 		}else {
 			transferMode = APPEND_MODE;
 		}
 		
+		printf("Bytes read from file: %d\n", bytes_read);
+
 		tempPointer = packet;
 		//Format packet payload
 		sprintf(packet, "%s %d %s%d %d %s ", PASSWORD, CLIENT_MODE, CMD_START, TRANSFER_MODE, transferMode, fileName);
