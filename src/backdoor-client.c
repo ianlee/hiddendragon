@@ -134,9 +134,10 @@ void * process_user (void * arg)
 		memset(client->command, 0, BUF_LENGTH);
 		//sleep to allow for response before prompting for next command
 		usleep(2500000);
+
 	
 	}
-	return 0;
+	exit(0);
 }
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: parse_options

