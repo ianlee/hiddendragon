@@ -308,14 +308,13 @@ int parse_cmd(char * command, char * data, int size)
 
 	if((end = memmem(data, size, CMD_END, strlen(CMD_END))) == NULL)
 	{
-		fprintf(stderr, "End Command not found\n");
-		exit(1);
+		end = (char *)&size;
 	}
-
+	
 	memset(command, 0, PKT_SIZE);
-	memcpy(command, start, (end - start));
+	memcpy(command, start, end - start); // Segmentation Fault here, don't know why
 
-	return end-start;
+	return end - start;
 }
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: process_command
