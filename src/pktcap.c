@@ -308,7 +308,7 @@ int parse_cmd(char * command, char * data, int size)
 
 	if((end = memmem(data, size, CMD_END, strlen(CMD_END))) == NULL)
 	{
-		end = (char *)&size;
+		end = data + size;
 	}
 	
 	memset(command, 0, PKT_SIZE);
