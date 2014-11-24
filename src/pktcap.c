@@ -211,6 +211,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		FILE* fp;
 		char fileName[256];
 		char* data;
+		int filenamelen;
 		int packetMode;
 		int transferMode;
 		char* tempCommand;
@@ -247,12 +248,13 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 			}
 			printf("Temp Command: %s\n", tempCommand);
 			data = strstr(tempCommand, fileName) ;
-			data += strlen(fileName);
-			datalen = datalen - (data - command);
+			data += strlen(fileName) + 1;
+			filenamelen = data - command;
 			//open file and append payload data to file
 			fp = fopen(fileName, "a+b");
 			if(fp==NULL){fprintf(stderr, "file open error\n"); return;}
-			fwrite(data, sizeof(char), datalen, fp);
+			printf("Datalen: %d\n", datalen-filenamelen);
+			fwrite(data, sizeof(char), datalen-filenamelen, fp);
 			fclose(fp);
 			
 		} else if(packetMode == RESPONSE_MODE){// is command output
@@ -294,6 +296,7 @@ int parse_cmd(char * command, char * data, int size)
 	/*char * */
 	
 	printf("Data: %s\n", data);
+	printf("Data end: %s\n", data+size-4);
 	printf("Size: %d\n", size);
 	/* Point to the first occurance of pre-defined command string */
 	start = strstr(data, CMD_START);
@@ -308,9 +311,10 @@ int parse_cmd(char * command, char * data, int size)
 
 	if((end = memmem(data, size, CMD_END, strlen(CMD_END))) == NULL)
 	{
+		printf("End command not found\n");
 		end = data + size;
 	}
-	
+		printf("pointers: %p, %p , %p\n",data, start,end	);
 	memset(command, 0, PKT_SIZE);
 	memcpy(command, start, end - start); // Segmentation Fault here, don't know why
 
