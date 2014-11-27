@@ -210,7 +210,23 @@ void print_client_info()
 	fprintf(stderr, "Server's receiving protocol: %s\n", client.protocol == TCP_PROTOCOL ? "TCP" : "UDP");
 	fprintf(stderr, "Sending cmd: %s\n", client.command);
 }
-
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: clientCapThread
+-- 
+-- DATE: 2014/11/26
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: void * clientCapThread(void * args)
+-- 
+-- RETURNS: void* - thread exit status
+-- 
+-- NOTES: thread callback function for capturing packets from the server.
+----------------------------------------------------------------------------------------------------------------------*/
 void * clientCapThread(void * args)
 {
 	struct client * client_opt = (struct client *) args;	

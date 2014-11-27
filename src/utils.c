@@ -214,7 +214,7 @@ void usage(char * program_name, int mode){
 -- 
 -- PROGRAMMER: Luke Tao, Ian Lee
 -- 
--- INTERFACE: void send_packet(char * data, const char * src_ip, const char * dest_ip, int dest_port)
+-- INTERFACE: void send_packet(char * data, int protocol, int data_len, const char * src_ip, const char * dest_ip, int dest_port)
 -- 
 -- RETURNS: nothing
 -- 
@@ -282,6 +282,23 @@ void send_packet(char * data, int protocol, int data_len, const char * src_ip, c
 	free(packet);
 }
 
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: craft_tcp_packet
+-- 
+-- DATE: 2014/11/26
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: void craft_tcp_packet(unsigned char * packet, char * data, int data_len, struct ip iph, struct tcphdr tcph, int dest_port)
+-- 
+-- RETURNS: nothing
+-- 
+-- NOTES: Crafts tcp header for packet
+----------------------------------------------------------------------------------------------------------------------*/
 void craft_tcp_packet(unsigned char * packet, char * data, int data_len, struct ip iph, struct tcphdr tcph, int dest_port)
 {
 	/* create a forged TCP header */
@@ -301,6 +318,23 @@ void craft_tcp_packet(unsigned char * packet, char * data, int data_len, struct 
         memcpy(packet + sizeof(iph) + sizeof(tcph), data, data_len);
 }
 
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: craft_udp_packet
+-- 
+-- DATE: 2014/11/26
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: void craft_udp_packet(unsigned char * packet, char * data, int data_len, struct ip iph, struct udphdr udph, int dest_port)
+-- 
+-- RETURNS: nothing
+-- 
+-- NOTES: Crafts a UDP header for packet
+----------------------------------------------------------------------------------------------------------------------*/
 void craft_udp_packet(unsigned char * packet, char * data, int data_len, struct ip iph, struct udphdr udph, int dest_port)
 {
 	udph.uh_sport = htons(1 + (int)(10000.0 * rand() / (RAND_MAX + 1.0)));

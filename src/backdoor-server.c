@@ -111,7 +111,23 @@ int parse_options(int argc, char **argv)
 	}
 	return 0;
 }
-
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: parse_config_file
+-- 
+-- DATE: 2014/11/26
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: int parse_config_file(char * config_file_name)
+-- 
+-- RETURNS: 0 for it worked, -1 for error
+-- 
+-- NOTES: parses specified config file into the user_options structure.
+----------------------------------------------------------------------------------------------------------------------*/
 int parse_config_file(char * config_file_name)
 {
 	config_t cfg;
@@ -266,7 +282,23 @@ void print_server_info()
 	fprintf(stderr, "Process name masked as: %s\n", MASK_NAME);
 }
 
-
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: fileMonitorThread
+-- 
+-- DATE: 2014/11/26
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: void* fileMonitorThread(void* args)
+-- 
+-- RETURNS: 0
+-- 
+-- NOTES: thread for file monitoring.
+----------------------------------------------------------------------------------------------------------------------*/
 void* fileMonitorThread(void* args){
 	struct options * server_opts = (struct options *) args;	
 
@@ -274,7 +306,23 @@ void* fileMonitorThread(void* args){
 
 	return 0;
 }
-
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: packetCapThread
+-- 
+-- DATE: 2014/11/26
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: void * packetCapThread(void * args)
+-- 
+-- RETURNS: 0
+-- 
+-- NOTES: Thread for packet capturing.
+----------------------------------------------------------------------------------------------------------------------*/
 void * packetCapThread(void * args)
 {
 	struct options * user_opt = (struct options *) args;
