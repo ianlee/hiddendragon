@@ -2,9 +2,11 @@
 #define RELAY_H
 
 #include "pktcap.h"
+#include "utils.h"
 
 #define DEFAULT_DEST_PORT 7000
 #define DEFAULT_LISTEN_PORT 8080
+#define USER_ROOT 0
 
 struct relay
 {

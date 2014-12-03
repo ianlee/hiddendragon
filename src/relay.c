@@ -28,7 +28,7 @@ int start_relay()
 	struct bpf_program fp;
 
 	startPacketCapture(nic_handle, fp, FROM_RELAY, NULL, relay_options.listen_port, 
-		relay_options.client_host, relay_options.dst_port, relay_options.protocol);
+		relay_options.client_host, relay_options.dest_port, relay_options.protocol);
 	stopPacketCapture(nic_handle, fp);
 	return 0;
 
@@ -46,7 +46,7 @@ int parse_options(int argc, char **argv)
 				relay_options.client_host = optarg;
 				break;
 			case 'd':
-				relay_options.dst_port = atoi(optarg);
+				relay_options.dest_port = atoi(optarg);
 				break;
 			case 'l':
 				relay_options.listen_port = atoi(optarg);
@@ -77,7 +77,7 @@ int parse_options(int argc, char **argv)
 void print_opt()
 {
 	fprintf(stderr, "Listening on port: %d\n", relay_options.listen_port);
-	fprintf(stderr, "Destination port to send to: %d\n", relay_options.dst_port);
+	fprintf(stderr, "Destination port to send to: %d\n", relay_options.dest_port);
 	fprintf(stderr, "Host to forward to: %s\n", relay_options.client_host);
 	fprintf(stderr, "Protocol: %s\n", relay_options.protocol == TCP_PROTOCOL ? "TCP" : "UDP");
 }
