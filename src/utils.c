@@ -195,11 +195,25 @@ void usage(char * program_name, int mode){
 	}
 	if(mode == CLIENT_MODE)
 	{
-		fprintf(stderr, "Usage: %s -a host [-p port]\n", program_name);
+		fprintf(stderr, "Usage: %s -a host [-p protocol]\n", program_name);
 		fprintf(stderr, "-a 	- Server host to send commands to\n\n");
-		fprintf(stderr, "-p 	- Destination port to send commands to\n");
-		fprintf(stderr, " 	- IF NOT SPECIFIED, default is port 8080\n");
+                fprintf(stderr, "-d     - Destination Port to server\n");
+                fprintf(stderr, "       - IF NOT SPECIFIED, default is port 8080\n");
+                fprintf(stderr, "-p     - Protocol to specify (TCP or UDP)\n");
+                fprintf(stderr, "       - IF NOT SPECIFIED, default is TCP\n");
 	}
+        if(mode == RELAY_MODE)
+        {
+                fprintf(stderr, "Usage: %s -a host [-d dest-port] [-l listen-port] [-p protocol]\n", program_name);
+                fprintf(stderr, "-a     - Client host to forward data to\n\n");
+                fprintf(stderr, "-d     - Destination Port to forward data to\n");
+                fprintf(stderr, "       - IF NOT SPECIFIED, default is port 7000\n");
+                fprintf(stderr, "-l     - Port to listen for incoming packets\n");
+                fprintf(stderr, "       - IF NOT SPECIFIED, default is port 8080\n");
+                fprintf(stderr, "-p     - Protocol to specify (TCP or UDP)\n");
+                fprintf(stderr, "       - IF NOT SPECIFIED, default is TCP\n");
+        }
+        
 	exit(1);
 }
 

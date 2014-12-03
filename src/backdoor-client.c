@@ -233,7 +233,7 @@ void * clientCapThread(void * args)
 	pcap_t * nic_handle = NULL;
 	struct bpf_program fp;	
 
-	startPacketCapture(nic_handle, fp, FROM_SERVER, client_opt->server_host, client_opt->dst_port, client_opt->protocol);
+	startPacketCapture(nic_handle, fp, FROM_SERVER, client_opt->server_host, client_opt->dst_port, NULL, -1, client_opt->protocol);
 	stopPacketCapture(nic_handle, fp);
 
 	return 0;

@@ -31,6 +31,7 @@
 #include <net/if.h>
 #include "lib/isaac_encryption.h"
 
+#define RELAY_MODE 2
 #define SERVER_MODE 0
 #define CLIENT_MODE 1
 #define TCP_PROTOCOL 6

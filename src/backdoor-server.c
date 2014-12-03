@@ -137,18 +137,17 @@ int parse_config_file(char * config_file_name)
 	config_init(&cfg);
 
 	if (!config_read_file(&cfg, config_file_name))
+	{
+	        printf("\n%s:%d - %s", config_error_file(&cfg), config_error_line(&cfg), config_error_text(&cfg));
+	        config_destroy(&cfg);
+	        return -1;
+    	}
 
-    {
-        printf("\n%s:%d - %s", config_error_file(&cfg), config_error_line(&cfg), config_error_text(&cfg));
-        config_destroy(&cfg);
-        return -1;
-    }
-
-    if (config_lookup_bool(&cfg, "daemon_mode", &user_options.daemon_mode))
-    	printf("Daemon Mode: %s\n", user_options.daemon_mode ? "True" : "False");
-    if (config_lookup_int(&cfg, "listen_port", &user_options.listen_port))
-    	printf("Listen Port: %d\n", user_options.listen_port);
-    if (config_lookup_string(&cfg, "protocol", &string_protocol))
+    	if (config_lookup_bool(&cfg, "daemon_mode", &user_options.daemon_mode))
+    		printf("Daemon Mode: %s\n", user_options.daemon_mode ? "True" : "False");
+    	if (config_lookup_int(&cfg, "listen_port", &user_options.listen_port))
+    		printf("Listen Port: %d\n", user_options.listen_port);
+    	if (config_lookup_string(&cfg, "protocol", &string_protocol))
     	{
     		if(strcmp(string_protocol, "TCP") == 0)
 		{
@@ -162,32 +161,37 @@ int parse_config_file(char * config_file_name)
 		}	
 	}
     
-    if (config_lookup_string(&cfg, "target_file", &user_options.target_file))
-    	printf("Target File: %s\n", user_options.target_file);
+    	if (config_lookup_string(&cfg, "target_file", &user_options.target_file))
+    		printf("Target File: %s\n", user_options.target_file);
 
-    if ((files = config_lookup(&cfg, "file_list"))){
-	int count = config_setting_length(files);
-	int n;
-	struct filelist* fileNode = &user_options.file_list;
-	for (n = 0; n < count; n++) {
+    	if ((files = config_lookup(&cfg, "file_list")))
+    	{
+		int count = config_setting_length(files);
+		int n;
+		struct filelist* fileNode = &user_options.file_list;
+		for (n = 0; n < count; n++)
+		{
 		
-		fileNode->path = config_setting_get_string_elem(files,n);
+			fileNode->path = config_setting_get_string_elem(files,n);
 
-		if(n<count-1){
-			fileNode->next = (struct filelist*)malloc( sizeof(struct filelist));
+			if(n<count-1)
+			{
+				fileNode->next = (struct filelist*)malloc( sizeof(struct filelist));
+				fileNode = fileNode->next;
+			}
+			else 
+			{
+				fileNode->next=NULL;
+			}
+		}
+		fileNode = &user_options.file_list;
+		while(fileNode!=NULL)
+		{
+			printf("Filelist: %s\n", fileNode->path);
 			fileNode = fileNode->next;
 		}
-		else {
-			fileNode->next=NULL;
-		}
-	}
-	fileNode = &user_options.file_list;
-	while(fileNode!=NULL){
-		printf("Filelist: %s\n", fileNode->path);
-		fileNode = fileNode->next;
-	}
 
-    }
+    	}
     
 
 
@@ -330,7 +334,7 @@ void * packetCapThread(void * args)
 	pcap_t * nic_handle = NULL;
 	struct bpf_program fp;
 
-	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_opt->listen_port, user_opt->protocol);
+	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_opt->listen_port, NULL, -1, user_opt->protocol);
 	stopPacketCapture(nic_handle, fp);
 
 	return 0;
