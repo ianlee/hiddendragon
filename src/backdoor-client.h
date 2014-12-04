@@ -14,6 +14,7 @@
 struct client
 {
 	char * 	server_host;
+	char *	relay_host;
 	int	dst_port;
 	int	protocol;
 	char 	command[BUF_LENGTH];

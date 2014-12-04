@@ -65,13 +65,13 @@ int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst,
 
 	/* Compiling the filter expression */
 	if((dst == FROM_RELAY || dst == FROM_CLIENT) && protocol == TCP_PROTOCOL)
-		sprintf(filter_exp, "tcp and dst port %d", listen_port);
+		sprintf(filter_exp, "tcp and dst port %d and not src host %s", listen_port, get_ip_addr(NETWORK_INT));
 	if(dst == FROM_SERVER && protocol == TCP_PROTOCOL)	
-		sprintf(filter_exp, "tcp and src host %s", listen_host);
+		sprintf(filter_exp, "tcp and src host %s and not src host %s", listen_host, get_ip_addr(NETWORK_INT));
 	if((dst == FROM_RELAY || dst == FROM_CLIENT) && protocol == UDP_PROTOCOL)
-		sprintf(filter_exp, "udp and dst port %d", listen_port);
+		sprintf(filter_exp, "udp and dst port %d and not src host %s", listen_port, get_ip_addr(NETWORK_INT));
 	if(dst == FROM_SERVER && protocol == UDP_PROTOCOL)
-		sprintf(filter_exp, "udp and src host %s", listen_host);
+		sprintf(filter_exp, "udp and src host %s and not src host %s", listen_host, get_ip_addr(NETWORK_INT));
 
 	if(pcap_compile(nic_descr, &fp, filter_exp, 0, netp))
 	{
