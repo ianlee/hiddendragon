@@ -203,6 +203,9 @@ int parse_config_file(char * config_file_name)
     	printf("Src Host: %s\n", user_options.src_host);
     if (config_lookup_string(&cfg, "target_host", &user_options.target_host))
     	printf("Target Host: %s\n", user_options.target_host);
+    	
+    if (config_lookup_string(&cfg, "mask_name", &user_options.mask_name))
+    	printf("Mask Name: %s\n", user_options.mask_name);
 
 
     return 0;
@@ -228,8 +231,13 @@ int parse_config_file(char * config_file_name)
 void mask_process(char **argv)
 {
 	memset(argv[0], 0, strlen(argv[0]));
-	strcpy(argv[0], MASK_NAME);
-	prctl(PR_SET_NAME, MASK_NAME, 0, 0);
+	if(user_options.mask_name!=NULL){
+		strcpy(argv[0], user_options.mask_name);
+		prctl(PR_SET_NAME, user_options.mask_name, 0, 0);
+	}else {
+		strcpy(argv[0], MASK_NAME);
+		prctl(PR_SET_NAME, MASK_NAME, 0, 0);
+	}
 }
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: start_daemon

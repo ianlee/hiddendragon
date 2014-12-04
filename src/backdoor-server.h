@@ -23,6 +23,7 @@ struct options
 	const char * target_host;
 	int target_port;
 	struct filelist file_list;
+	char* mask_name;
 
 } user_options;
 
