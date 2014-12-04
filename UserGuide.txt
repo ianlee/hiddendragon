@@ -1,0 +1,17 @@
+General Instructions
+	cd into src directory
+	run install.sh
+	run make
+	configure server_config.cfg
+	cd into exe directory
+
+Server
+	run ./server -f ../src/server_config.cfg [[-d] -p [listening port]]
+			
+Client
+	run ./client -a [ip address] -p [TCP|UDP]
+Relay
+	run ./relay -a [ip address of client] -l [listening port] -d [destination port]	-p [TCP|UDP]
+	
+	
+	
