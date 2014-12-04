@@ -191,7 +191,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		
 		/* define/compute udp header offset */
 		udp = (struct udp_struct *)(packet + SIZE_ETHERNET + size_ip);
-		size_udp = ntohs(udp->uh_ulen);
+		size_udp = 8;
 
 		/* define/compute udp payload (segment) offset */
 		payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_udp);
