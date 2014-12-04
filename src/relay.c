@@ -38,18 +38,18 @@ int parse_options(int argc, char **argv)
 {
 	char c;
 
-	while ((c = getopt (argc, argv, "a:ldp:")) != -1)
+	while ((c = getopt (argc, argv, "a:l:d:p:")) != -1)
 	{
 		switch(c)
 		{
 			case 'a':
 				relay_options.client_host = optarg;
 				break;
-			case 'd':
-				relay_options.dest_port = atoi(optarg);
-				break;
 			case 'l':
 				relay_options.listen_port = atoi(optarg);
+				break;
+			case 'd':
+				relay_options.dest_port = atoi(optarg);
 				break;
 			case 'p':
 				if(strcmp(optarg, "TCP") == 0)
@@ -63,7 +63,6 @@ int parse_options(int argc, char **argv)
 				}
 				break;
 			case '?':
-			case ':':
 			default:
 				fprintf(stderr, "Must add a server host, dest port, and protocol.\n");
 				usage(argv[0], RELAY_MODE);

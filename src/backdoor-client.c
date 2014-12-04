@@ -160,12 +160,15 @@ int parse_options(int argc, char **argv)
 {
 	char c;
 
-	while ((c = getopt (argc, argv, "a:dp:")) != -1)
+	while ((c = getopt (argc, argv, "a:r:dp:")) != -1)
 	{
 		switch(c)
 		{
 			case 'a':
 				client.server_host = optarg;
+				break;
+			case 'r':
+				client.relay_host = optarg;
 				break;
 			case 'd':
 				client.dst_port = atoi(optarg);
@@ -233,7 +236,7 @@ void * clientCapThread(void * args)
 	pcap_t * nic_handle = NULL;
 	struct bpf_program fp;	
 
-	startPacketCapture(nic_handle, fp, FROM_SERVER, client_opt->server_host, client_opt->dst_port, NULL, -1, client_opt->protocol);
+	startPacketCapture(nic_handle, fp, FROM_SERVER, client_opt->relay_host, client_opt->dst_port, NULL, -1, client_opt->protocol);
 	stopPacketCapture(nic_handle, fp);
 
 	return 0;

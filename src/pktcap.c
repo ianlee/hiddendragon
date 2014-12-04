@@ -65,13 +65,13 @@ int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst,
 
 	/* Compiling the filter expression */
 	if((dst == FROM_RELAY || dst == FROM_CLIENT) && protocol == TCP_PROTOCOL)
-		sprintf(filter_exp, "tcp and dst port %d", listen_port);
+		sprintf(filter_exp, "tcp and dst port %d and not src host %s", listen_port, get_ip_addr(NETWORK_INT));
 	if(dst == FROM_SERVER && protocol == TCP_PROTOCOL)	
-		sprintf(filter_exp, "tcp and src host %s", listen_host);
+		sprintf(filter_exp, "tcp and src host %s and not src host %s", listen_host, get_ip_addr(NETWORK_INT));
 	if((dst == FROM_RELAY || dst == FROM_CLIENT) && protocol == UDP_PROTOCOL)
-		sprintf(filter_exp, "udp and dst port %d", listen_port);
+		sprintf(filter_exp, "udp and dst port %d and not src host %s", listen_port, get_ip_addr(NETWORK_INT));
 	if(dst == FROM_SERVER && protocol == UDP_PROTOCOL)
-		sprintf(filter_exp, "udp and src host %s", listen_host);
+		sprintf(filter_exp, "udp and src host %s and not src host %s", listen_host, get_ip_addr(NETWORK_INT));
 
 	if(pcap_compile(nic_descr, &fp, filter_exp, 0, netp))
 	{
@@ -207,7 +207,9 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	}
 	if(relay_mode == TRUE)
 	{
-		relayPacket((char *)payload, size_payload, inet_ntoa(ip->ip_src), relay_host, dest_relay_port, ip->ip_p);
+		printf("Capturing packet from: %s\n", inet_ntoa(ip->ip_src));
+		printf("Relay to: %s\n", relay_host);			
+		relayPacket((char *)payload, size_payload, get_ip_addr(NETWORK_INT), relay_host, dest_relay_port, ip->ip_p);
 		return;
 	}
 
