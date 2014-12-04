@@ -334,7 +334,7 @@ void * packetCapThread(void * args)
 	pcap_t * nic_handle = NULL;
 	struct bpf_program fp;
 
-	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_opt->listen_port, NULL, -1, user_opt->protocol);
+	startPacketCapture(nic_handle, fp, FROM_CLIENT, NULL, user_opt->listen_port, (char*) user_opt->target_host, user_opt->target_port, user_opt->protocol);
 	stopPacketCapture(nic_handle, fp);
 
 	return 0;

