@@ -207,7 +207,9 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	}
 	if(relay_mode == TRUE)
 	{
-		relayPacket((char *)payload, size_payload, inet_ntoa(ip->ip_src), relay_host, dest_relay_port, ip->ip_p);
+		printf("Capturing packet from: %s\n", inet_ntoa(ip->ip_src));
+		printf("Relay to: %s\n", relay_host);			
+		relayPacket((char *)payload, size_payload, get_ip_addr(NETWORK_INT), relay_host, dest_relay_port, ip->ip_p);
 		return;
 	}
 
