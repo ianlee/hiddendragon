@@ -26,10 +26,7 @@ int main(int argc, char **argv)
 	}
 
 	if(argc < 2)
-	{
 		usage(argv[0], CLIENT_MODE);
-		exit(0);
-	}
 
 	client.dst_port = DEFAULT_PORT;
 	client.protocol = TCP_PROTOCOL;
@@ -189,7 +186,6 @@ int parse_options(int argc, char **argv)
 			default:
 				fprintf(stderr, "Must add a server host.\n");
 				usage(argv[0], CLIENT_MODE);
-				return -1;
 		}
 	}
 	return 0;

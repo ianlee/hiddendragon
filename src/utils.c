@@ -181,7 +181,7 @@ char *get_line (char *s, size_t n, FILE *f)
 -- 
 -- RETURNS: nothing
 -- 
--- NOTES: Prints out program usage
+-- NOTES: Prints out program usage and exits
 ----------------------------------------------------------------------------------------------------------------------*/
 void usage(char * program_name, int mode){
 	if(mode == SERVER_MODE)
@@ -214,8 +214,7 @@ void usage(char * program_name, int mode){
                 fprintf(stderr, "-p     - Protocol to specify (TCP or UDP)\n");
                 fprintf(stderr, "       - IF NOT SPECIFIED, default is TCP\n");
         }
-        
-	exit(1);
+        exit(0);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------

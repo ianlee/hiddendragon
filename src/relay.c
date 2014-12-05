@@ -26,10 +26,7 @@ int main(int argc, char **argv)
     		exit(0);
 	}
 	if(argc < 2)
-	{
 		usage(argv[0], RELAY_MODE);
-		exit(0);
-	}
 
 	relay_options.listen_port = DEFAULT_LISTEN_PORT;
 	relay_options.dest_port = DEFAULT_DEST_PORT;

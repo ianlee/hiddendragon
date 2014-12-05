@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	user_options.configFile ="server_config.cfg";
+	user_options.configFile = "../src/server_config.cfg";
 	if(parse_options(argc, argv) < 0)
 		exit(-1);
 
