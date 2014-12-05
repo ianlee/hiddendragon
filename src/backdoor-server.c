@@ -90,10 +90,13 @@ int start_server()
 int parse_options(int argc, char **argv)
 {
 	char c;
-	while ((c = getopt (argc, argv, "dp:f:")) != -1)
+	while ((c = getopt (argc, argv, "hdp:f:")) != -1)
 	{
 		switch (c)
 		{
+			case 'h':
+				usage(argv[0], SERVER_MODE);
+				return 0;
 			case 'd':
 				user_options.daemon_mode = TRUE;
 				break;

@@ -14,16 +14,16 @@
 
 struct options
 {
-	char* configFile;
+	char * configFile;
 	int daemon_mode;
 	int listen_port;
 	int protocol;
 	const char * target_file;
 	const char * src_host;
 	const char * target_host;
+	const char * mask_name;
 	int target_port;
 	struct filelist file_list;
-	char* mask_name;
 
 } user_options;
 

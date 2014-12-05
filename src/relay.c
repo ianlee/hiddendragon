@@ -1,5 +1,22 @@
 #include "relay.h"
 
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: main
+-- 
+-- DATE: 2014/12/02
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: int main(int argc, char **argv)
+-- 
+-- RETURNS: 0 for ok, 1 for error
+-- 
+-- NOTES: main driver function for relay program
+----------------------------------------------------------------------------------------------------------------------*/
 int main(int argc, char **argv)
 {
 	/* Check to see if user is root */
@@ -7,6 +24,11 @@ int main(int argc, char **argv)
 	{
 		printf("\nYou need to be root to run this.\n\n");
     		exit(0);
+	}
+	if(argc < 2)
+	{
+		usage(argv[0], RELAY_MODE);
+		exit(0);
 	}
 
 	relay_options.listen_port = DEFAULT_LISTEN_PORT;
@@ -22,6 +44,23 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: start_relay
+-- 
+-- DATE: 2014/12/02
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: int start_relay()
+-- 
+-- RETURNS: 0 for ok, 1 for error
+-- 
+-- NOTES: Function that will start packet capturing
+----------------------------------------------------------------------------------------------------------------------*/
 int start_relay()
 {
 	pcap_t * nic_handle = NULL;
@@ -34,6 +73,23 @@ int start_relay()
 
 }
 
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: parse_options
+-- 
+-- DATE: 2014/12/02
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: int parse_options(int argc, char **argv)
+-- 
+-- RETURNS: 0 for ok, -1 for error
+-- 
+-- NOTES: Parsing user command line options to pass into start_relay()
+----------------------------------------------------------------------------------------------------------------------*/
 int parse_options(int argc, char **argv)
 {
 	char c;
@@ -73,6 +129,23 @@ int parse_options(int argc, char **argv)
 
 }
 
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: print_opt
+-- 
+-- DATE: 2014/12/02
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao, Ian Lee
+-- 
+-- PROGRAMMER: Luke Tao, Ian Lee
+-- 
+-- INTERFACE: void print_opt()
+-- 
+-- RETURNS: void
+-- 
+-- NOTES: Print user options on initial packet capture
+----------------------------------------------------------------------------------------------------------------------*/
 void print_opt()
 {
 	fprintf(stderr, "Listening on port: %d\n", relay_options.listen_port);

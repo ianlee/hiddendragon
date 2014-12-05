@@ -186,7 +186,8 @@ char *get_line (char *s, size_t n, FILE *f)
 void usage(char * program_name, int mode){
 	if(mode == SERVER_MODE)
 	{
-		fprintf(stderr, "Usage: %s [-d daemon mode] [-p port]\n", program_name);
+		fprintf(stderr, "Usage: %s -f config-file [-d] [-p port]\n", program_name);
+                fprintf(stderr, "-f     - Path of config file to read from (.cfg)\n");
 		fprintf(stderr, "-d 	- Daemon mode (run the server process in the background)\n");
 		fprintf(stderr, " 	- IF NOT SPECIFIED, default is running server in foreground with messages displayed\n");
 		fprintf(stderr, "-p 	- Destination Port to capture packets from\n");
@@ -195,7 +196,7 @@ void usage(char * program_name, int mode){
 	}
 	if(mode == CLIENT_MODE)
 	{
-		fprintf(stderr, "Usage: %s -a host [-p protocol]\n", program_name);
+		fprintf(stderr, "Usage: %s -a host [-d dest-port] [-p protocol]\n", program_name);
 		fprintf(stderr, "-a 	- Server host to send commands to\n\n");
                 fprintf(stderr, "-d     - Destination Port to server\n");
                 fprintf(stderr, "       - IF NOT SPECIFIED, default is port 8080\n");

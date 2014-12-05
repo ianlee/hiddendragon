@@ -25,6 +25,12 @@ int main(int argc, char **argv)
     		exit(0);
 	}
 
+	if(argc < 2)
+	{
+		usage(argv[0], CLIENT_MODE);
+		exit(0);
+	}
+
 	client.dst_port = DEFAULT_PORT;
 	client.protocol = TCP_PROTOCOL;
 	
